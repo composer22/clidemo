@@ -22,7 +22,7 @@ func configureLogging() {
 
 // configureServerEnvironment configures the physical and logical server components for the application run.
 func configureServerEnvironment(opts *server.Options) {
-	if opts.MaxProcs <= 0 {
+	if opts.MaxProcs > 0 {
 		runtime.GOMAXPROCS(opts.MaxProcs)
 	}
 	log.Printf("INFO: NumCPU %d GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))

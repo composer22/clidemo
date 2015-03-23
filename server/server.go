@@ -21,7 +21,7 @@ type Server struct {
 	infoJSON []byte         // Basic server information as json.
 	opts     *Options       // Original options and info for creating the server.
 	running  bool           // Is the server running?
-	jobqCh   chan *parseJob // Channel to send jobs.
+	jobq     chan *parseJob // Channel to send jobs.
 	wg       sync.WaitGroup // Synchronize close() of job channel.
 	start    time.Time      // The start time of the server.
 	stats                   // Server statistics since it started.
@@ -61,7 +61,7 @@ func New(opts *Options) *Server {
 		info:     info,
 		infoJSON: []byte(fmt.Sprintf("{\"info\":%s}", b)),
 		opts:     opts,
-		jobqCh:   make(chan *parseJob),
+		jobq:     make(chan *parseJob),
 		running:  false,
 		start:    time.Now(),
 	}
@@ -85,7 +85,7 @@ func (s *Server) Start() {
 
 	for i := 0; i < s.opts.MaxConn; i++ {
 		s.wg.Add(1)
-		go parseWorker(s.jobqCh, &s.wg)
+		go parseWorker(s.jobq, &s.wg)
 	}
 
 	mux := http.NewServeMux()
@@ -107,7 +107,7 @@ func (s *Server) handleSignals() {
 			}
 			s.mu.Unlock()
 			log.Println("[INFO] Server closing all jobs...")
-			close(s.jobqCh)
+			close(s.jobq)
 			s.wg.Wait()
 			log.Println("[INFO] Server exiting...")
 			os.Exit(0)
@@ -156,7 +156,7 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 		Source: d,
 		DoneCh: make(chan bool),
 	}
-	s.jobqCh <- &job
+	s.jobq <- &job
 	<-job.DoneCh
 
 	w.Write([]byte(job.ResultJSON))
