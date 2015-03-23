@@ -1,4 +1,5 @@
-// Package server implements a simple server to return concordance (word count + sentence location) for sample text.
+// Package server implements a simple server to return concordance (word count + sentence
+// location) for sample text.
 package server
 
 import (
@@ -172,7 +173,8 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// errorHandler wraps a standard response for any invalid condition found by the other http handlers.
+// errorHandler wraps a standard response for any invalid condition found by the other http
+// handlers.
 func (s *Server) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 	if status == http.StatusNotFound {
@@ -180,7 +182,8 @@ func (s *Server) errorHandler(w http.ResponseWriter, r *http.Request, status int
 	}
 }
 
-// invalidURLPath validates that the URL path is acceptable for processing the request from the client.
+// invalidURLPath validates that the URL path is acceptable for processing the request from
+// the client.
 func (s *Server) invalidURLPath(w http.ResponseWriter, r *http.Request, path string) bool {
 	if r.URL.Path != path {
 		s.errorHandler(w, r, http.StatusNotFound)
@@ -189,7 +192,8 @@ func (s *Server) invalidURLPath(w http.ResponseWriter, r *http.Request, path str
 	return false
 }
 
-// invalidHeader validates that the header information is acceptable for processing the request from the client.
+// invalidHeader validates that the header information is acceptable for processing the
+// request from the client.
 func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request, method string) bool {
 	if r.Method != method ||
 		r.Header.Get("Content-Type") != "application/json" ||

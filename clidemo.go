@@ -1,5 +1,5 @@
-// clidemo is a simple demonstration of reading CLI info and evoking piping, file, or server work.
-// This application is also used to POC features of Golang as needed.
+// clidemo is a simple demonstration of reading CLI info and evoking piping, file, or server
+// work. This application is also used to POC features of Golang as needed.
 package main
 
 import (
@@ -20,7 +20,8 @@ func configureLogging() {
 	log.SetFlags(log.Lmicroseconds)
 }
 
-// configureServerEnvironment configures the physical and logical server components for the application run.
+// configureServerEnvironment configures the physical and logical server components for the
+// application run.
 func configureServerEnvironment(opts *server.Options) {
 	if opts.MaxProcs > 0 {
 		runtime.GOMAXPROCS(opts.MaxProcs)
@@ -38,10 +39,14 @@ func main() {
 	flag.StringVar(&opts.Name, "--name", "", "Name of the server")
 	flag.IntVar(&opts.Port, "P", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.Port, "--port", server.DefaultPort, "Port to listen on (default: 49152)")
-	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections, "Maximum server connections allowed (default: 4)")
-	flag.IntVar(&opts.MaxConn, "--connections", server.DefaultMaxConnections, "Maximum server connections allowed (default: 4)")
-	flag.IntVar(&opts.MaxProcs, "X", server.DefaultMaxProcs, "Maximum processor cores to use from the machine (default: <= 0 is no change")
-	flag.IntVar(&opts.MaxProcs, "--procs", server.DefaultMaxProcs, "Maximum processor cores to use from the machine (default: <= 0 is no change)")
+	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections,
+		"Maximum server connections allowed (default: 4)")
+	flag.IntVar(&opts.MaxConn, "--connections", server.DefaultMaxConnections,
+		"Maximum server connections allowed (default: 4)")
+	flag.IntVar(&opts.MaxProcs, "X", server.DefaultMaxProcs,
+		"Maximum processor cores to use from the machine (default: <= 0 is no change")
+	flag.IntVar(&opts.MaxProcs, "--procs", server.DefaultMaxProcs,
+		"Maximum processor cores to use from the machine (default: <= 0 is no change)")
 	flag.BoolVar(&opts.Debug, "d", false, "Enable debugging output (default: false)")
 	flag.BoolVar(&opts.Debug, "--debug", false, "Enable debugging output (default: false)")
 	flag.StringVar(&fileIn, "f", "", "Process input file")

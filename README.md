@@ -1,4 +1,4 @@
-# gnatsd
+# clidemo
 [![Build Status](https://travis-ci.org/composer22/clidemo.svg?branch=master)](http://travis-ci.org/composer22/clidemo)
 [![Current Release](http://img.shields.io/badge/release-v0.0.1eb0fc.svg)](https://github.com/composer22/clidemo/releases/tag/v0.0.1)
 [![Coverage Status](https://img.shields.io/coveralls/composer22/clidemo.svg)](https://coveralls.io/r/composer22/clidemo?branch=master)
@@ -11,7 +11,8 @@ not debugged or guaranteed to work.
 ## Usage
 
 ```
-Description: Parse text counting words and sentence locations, this command can be evoked as either a command line utility or as a stand alone server process.
+Description: Parse text counting words and sentence locations, this command can be
+evoked as either a command line utility or as a stand alone server process.
 
 Usage: clidemo [options...] [input_filename]
 
@@ -19,8 +20,9 @@ Server options:
     -N, --name NAME                  NAME of the server
     -p, --port PORT                  PORT to listen on (default: 49152)
     -n, --connections MAX            MAX server connections allowed (default: 4)
-    -X, --procs MAX                  MAX processor cores to use from the machine (default: 0)
-	                                 Anything <= 0 is no change to the environment.
+    -X, --procs MAX                  MAX processor cores to use from the machine
+									   Anything <= 0 is no change to the environment.
+									   (default: 0)
     -d, --debug                      Enable debugging output (default: false)
 
 File input options:
@@ -91,7 +93,7 @@ http://localhost:49152/v1.0/status/ - GET Returns information about the server.
 
 (The MIT License)
 
-Copyright (c) 2012-2015 Pyxxel Inc.
+Copyright (c) 2015 Pyxxel Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to

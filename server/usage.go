@@ -6,7 +6,8 @@ import (
 )
 
 const usageStr = `
-Description: Parse text counting words and sentence locations, this command can be evoked as either a command line utility or as a stand alone server process.
+Description: Parse text counting words and sentence locations, this command can be evoked as
+either a command line utility or as a stand alone server process.
 
 Usage: clidemo [options...] [input_filename]
 
