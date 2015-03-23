@@ -1,4 +1,5 @@
-// Package parser implements a mechanism for counting words and sentence locations for a given text source.
+// Package parser implements a mechanism for counting words and sentence locations for a given
+// text source.
 package parser
 
 import (
@@ -15,10 +16,11 @@ const (
 // Parser represents text source plus a mapping of unique words found in the text with an arrray of
 // sentence ids where the words were located.
 type Parser struct {
-	Words map[string]*wordRef `json:"words"` // Words as key with an int array that repesents the word sentence location.
+	Words map[string]*wordRef `json:"words"` // Words as key with struct of counts, location.
 }
 
-// wordRef represents a word found in the source text, a count on it's use, and which sentences it was found.
+// wordRef represents a word found in the source text, a count on it's use, and which
+// sentences it was found.
 type wordRef struct {
 	Counter     int   `json:"counter"`     // The number of times the word was found in the text.
 	SentenceUse []int `json:"sentenceUse"` // The sentence id where the word was found.
@@ -31,7 +33,8 @@ func New() *Parser {
 	}
 }
 
-// Execute begins the parsing process. The source text is read, words are counted, and unique sentence ids are recorded.
+// Execute begins the parsing process. The source text is read, words are counted, and unique
+// sentence ids are recorded.
 func (p *Parser) Execute(source io.Reader) {
 	scanner := bufio.NewScanner(source)
 	scanner.Split(bufio.ScanWords)
@@ -79,7 +82,8 @@ func (p *Parser) Reset() {
 	p.Words = make(map[string]*wordRef)
 }
 
-// String is an implentation of the Stringer interface so teh structure is returned as a string to fmt.Print() etc.
+// String is an implentation of the Stringer interface so teh structure is returned as a
+// string to fmt.Print() etc.
 func (p *Parser) String() string {
 	result, err := json.Marshal(p)
 	if err != nil {
