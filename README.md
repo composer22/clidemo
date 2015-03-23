@@ -1,6 +1,6 @@
 # clidemo
 [![Build Status](https://travis-ci.org/composer22/clidemo.svg?branch=master)](http://travis-ci.org/composer22/clidemo)
-[![Current Release](http://img.shields.io/badge/release-v0.0.1eb0fc.svg)](https://github.com/composer22/clidemo/releases/tag/v0.0.1)
+[![Current Release](http://img.shields.io/badge/release-v0.0.1-brightgreen.svg)](https://github.com/composer22/clidemo/releases/tag/v0.0.1)
 [![Coverage Status](https://img.shields.io/coveralls/composer22/clidemo.svg)](https://coveralls.io/r/composer22/clidemo?branch=master)
 
 A text parser for counting words and sentence locations written in [Go.](http://golang.org)
