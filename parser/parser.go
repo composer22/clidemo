@@ -82,8 +82,8 @@ func (p *Parser) Reset() {
 	p.Words = make(map[string]*wordRef)
 }
 
-// String is an implentation of the Stringer interface so teh structure is returned as a
-// string to fmt.Print() etc.
+// String is an implentation of the Stringer interface so the structure is returned as a string
+// to fmt.Print() etc.
 func (p *Parser) String() string {
 	result, err := json.Marshal(p)
 	if err != nil {
