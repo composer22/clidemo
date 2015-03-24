@@ -11,6 +11,6 @@ do
             fi
 fi
 done
-$HOME/gopath/bin/goveralls -coverprofile=acc.out $COVERALLS
+$HOME/gopath/bin/goveralls -coverprofile=acc.out $COVERALLS_TOKEN
 rm -rf ./profile.out
 rm -rf ./acc.out
