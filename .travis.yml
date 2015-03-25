@@ -8,6 +8,10 @@ os:
   - linux
   - osx
 
+branches:
+  only:
+    - master
+
 install:
   - go get golang.org/x/tools/cmd/vet
   - go get golang.org/x/tools/cmd/cover
