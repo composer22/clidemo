@@ -34,7 +34,7 @@ Common options:
 
 Examples:
 
-    # Server mode activated on port 8080; 10 conns; 2 processors
+    # Server mode activated as "Washington" on port 8080; 10 conns; 2 processors
     clidemo -N Washington -p 8080 -n 10 -X 2
 
 	# File input using -f flag with debug option
@@ -55,14 +55,13 @@ command line flags only
 
 ```
 
-
 ## Building
 
-This code currently requires at version 1.42 of Go, but we encourage
-the use of the latest stable release.  Information
-on installation, including pre-built binaries, is available at
-<http://golang.org/doc/install>.  Stable branches of operating system
-packagers provided by your OS vendor may not be sufficient.
+This code currently requires at version 1.42 of Go, but we encourage the use of the latest stable release.
+
+Information on Golang installation, including pre-built binaries, is available at
+<http://golang.org/doc/install>.  Stable branches of operating system packagers provided by
+your OS vendor may not be sufficient.
 
 Run `go version` to see the version of Go which you have installed.
 
@@ -70,23 +69,26 @@ Run `go build` inside the directory to build.
 
 Run `go test ./...` to run the unit regression tests.
 
-A successful build run produces no messages and creates an executable called
-`clidemo` in this directory.  You can invoke that binary, with no options to start a server with acceptable standalone defaults.
+A successful build run produces no messages and creates an executable called `clidemo` in this
+directory.  You can invoke that binary, with no options to start a server with acceptable standalone defaults.
 
-Run `go help` for more guidance, and visit <http://golang.org/> for tutorials,
-presentations, references and more.
-
+Run `go help` for more guidance, and visit <http://golang.org/> for tutorials, presentations, references and more.
 
 ## API calls
+
 Header should contain:
 
 Content-Type: application/json
+
 Accept: application/json
 
 URL:
+
 http://localhost:49152/v1.0/alive/ - GET Is the server alive?
+
 http://localhost:49152/v1.0/parse/ - GET Submit a parse request to the server.
                                       Body should contain {"text":"<your text to parse>"}
+
 http://localhost:49152/v1.0/status/ - GET Returns information about the server.
 
 ## License

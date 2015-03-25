@@ -1,15 +1,14 @@
 language: go
+
 go:
+- 1.4.2
 - tip
-- 1.3
 
 install:
-#- DST=~/gopath/src/github.com/composer22
-#- mkdir -p "$DST"
-#- git clone --depth=1 --quiet https://github.com/composer22/clidemo.git "$DST"/clidemo
 - go get golang.org/x/tools/cmd/vet
 - go get golang.org/x/tools/cmd/cover
 - go get github.com/mattn/goveralls
+
 script:
 - go build
 - ./travis/gofmt.sh
@@ -17,6 +16,9 @@ script:
 - go test -i -race ./...
 - go test -v -race ./...
 - ./travis/coveralls-script.sh
+
+notifications:
+  email: false
 env:
   global:
     secure: WHnLVWAezSTM62/N2vu/g5UoQ6c3NQrSPLE+dJMIs0nj1H/8VJlYXCBpSp6kprrpe2exj3FTNS14VXdOwTEHmFR/HLmGZFUNDm3DREN6AANn9rtbjni17LlFfo5VuY/e0fqyVm6VqDyWB3qHg3pkgZq5iT5tNT+2rlTuKeiQfDE=
