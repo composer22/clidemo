@@ -7,8 +7,8 @@ install:
 #- DST=~/gopath/src/github.com/composer22
 #- mkdir -p "$DST"
 #- git clone --depth=1 --quiet https://github.com/composer22/clidemo.git "$DST"/clidemo
-- go get code.google.com/p/go.tools/cmd/vet
-- go get code.google.com/p/go.tools/cmd/cover
+- go get golang.org/x/tools/cmd/vet
+- go get golang.org/x/tools/cmd/cover
 - go get github.com/mattn/goveralls
 script:
 - go build
