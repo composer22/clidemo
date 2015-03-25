@@ -85,9 +85,6 @@ func (p *Parser) Reset() {
 // String is an implentation of the Stringer interface so the structure is returned as a string
 // to fmt.Print() etc.
 func (p *Parser) String() string {
-	result, err := json.Marshal(p)
-	if err != nil {
-		return `{"error":"cannot create json result"}`
-	}
+	result, _ := json.Marshal(p)
 	return string(result)
 }
