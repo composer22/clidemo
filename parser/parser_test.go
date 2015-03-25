@@ -37,6 +37,6 @@ func TestParserReset(t *testing.T) {
 	p.Execute(r)
 	p.Reset()
 	if len(p.Words) != 0 {
-		t.Fatal("Invalid parser reset.\n")
+		t.Fatal("Invalid parser Reset().\n")
 	}
 }
