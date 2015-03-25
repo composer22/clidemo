@@ -29,3 +29,14 @@ func TestParserExecute(t *testing.T) {
 			testParserResultJSON, result)
 	}
 }
+
+// TestParserReset tests the reset method.
+func TestParserReset(t *testing.T) {
+	p := New()
+	r := bytes.NewBufferString(testParserText)
+	p.Execute(r)
+	p.Reset()
+	if len(p.Words) != 0 {
+		t.Fatal("Invalid parser reset.\n")
+	}
+}

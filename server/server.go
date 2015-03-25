@@ -123,6 +123,7 @@ func (s *Server) aliveHandler(w http.ResponseWriter, r *http.Request) {
 	if s.invalidURLPath(w, r, httpRouteAliveV1) || s.invalidHeader(w, r, httpGet) {
 		return
 	}
+	s.initResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -160,6 +161,7 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 	s.jobq <- &job
 	<-job.DoneCh
 
+	s.initResponseHeader(w)
 	w.Write([]byte(job.ResultJSON))
 }
 
@@ -170,6 +172,7 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 	if s.invalidURLPath(w, r, httpRouteStatusV1) || s.invalidHeader(w, r, httpGet) {
 		return
 	}
+	s.initResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 }
 
