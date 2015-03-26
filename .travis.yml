@@ -18,7 +18,7 @@ install:
   - go get github.com/mattn/goveralls
 
 script:
-  - go build
+#  - go build
   - ./travis/gofmt.sh
   - ./travis/govet.sh
   - go test -i -race ./...
