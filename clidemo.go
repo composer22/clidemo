@@ -1,5 +1,4 @@
-// clidemo is a simple demonstration of reading CLI info and evoking piping, file, or server
-// work. This application is also used to POC features of Golang as needed.
+// clidemo is a simple demonstration of reading CLI info and evoking piping, file, or server work. This application is also used to POC features of Golang as needed.
 package main
 
 import (
@@ -20,8 +19,7 @@ func configureLogging() {
 	log.SetFlags(log.Lmicroseconds)
 }
 
-// configureServerEnvironment configures the physical and logical server components for the
-// application run.
+// configureServerEnvironment configures the physical and logical server components for the application run.
 func configureServerEnvironment(opts *server.Options) {
 	if opts.MaxProcs > 0 {
 		runtime.GOMAXPROCS(opts.MaxProcs)
