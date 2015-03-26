@@ -8,11 +8,6 @@ os:
   - linux
   - osx
 
-# blacklist
-branches:
-  except:
-
-# whitelist
 branches:
   only:
     - master
