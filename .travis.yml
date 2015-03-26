@@ -13,16 +13,16 @@ branches:
     - master
 
 install:
-  - go get golang.org/x/tools/cmd/vet
+#  - go get golang.org/x/tools/cmd/vet
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
 script:
-  - go build
-  - ./travis/gofmt.sh
-  - ./travis/govet.sh
-  - go test -i -race ./...
-  - go test -v -race ./...
+#  - go build
+#  - ./travis/gofmt.sh
+#  - ./travis/govet.sh
+#  - go test -i -race ./...
+#  - go test -v -race ./...
   - ./travis/coveralls-script.sh
 
 notifications:
