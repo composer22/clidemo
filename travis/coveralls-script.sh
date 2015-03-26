@@ -14,6 +14,7 @@
 #$HOME/gopath/bin/goveralls -coverprofile=acc.out $COVERALLS_TOKEN
 #rm -rf ./profile.out
 #rm -rf ./acc.out
-
+echo "mode: count" > coverage.out
 go test -v -covermode=count -coverprofile=coverage.out
 $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+rm -rf coverage.out
