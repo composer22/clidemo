@@ -1,4 +1,5 @@
-// clidemo is a simple demonstration of reading CLI info and evoking piping, file, or server work. This application is also used to POC features of Golang as needed.
+// clidemo is a simple demonstration of reading CLI info and evoking piping, file, or server work. This application is
+// also used to POC features of Golang as needed.
 package main
 
 import (

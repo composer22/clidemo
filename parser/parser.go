@@ -31,7 +31,8 @@ func New() *Parser {
 	}
 }
 
-// Execute begins the parsing process. The source text is read, words are counted, and unique sentence ids are recorded.
+// Execute begins the parsing process. The source text is read, words are counted, and unique sentence ids are
+// recorded.
 func (p *Parser) Execute(source io.Reader) {
 	scanner := bufio.NewScanner(source)
 	scanner.Split(bufio.ScanWords)
