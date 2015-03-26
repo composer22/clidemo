@@ -22,9 +22,7 @@ script:
   - ./travis/govet.sh
   - go test -i -race ./...
   - go test -v -race ./...
-#  - ./travis/coveralls-script.sh
-  - go test -v -covermode=count -coverprofile=profile.out ./...
-  - $HOME/gopath/bin/goveralls -coverprofile=profile.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - ./travis/coveralls-script.sh
 
 notifications:
   email: false
