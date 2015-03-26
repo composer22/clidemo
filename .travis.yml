@@ -17,9 +17,6 @@ branches:
   only:
     - master
 	- develop
-	- /^release\/.*$/
-	- /^hotfix\/.*$/
-	- /^support\/.*$/
 
 install:
   - go get golang.org/x/tools/cmd/vet
