@@ -8,13 +8,18 @@ os:
   - linux
   - osx
 
+# blacklist
+branches:
+  except:
+
+# whitelist
 branches:
   only:
     - master
 	- develop
-	- /^release\/.*/
-	- /^hotfix\/.*/
-	- /^support\/.*/
+	- /^release\/.*$/
+	- /^hotfix\/.*$/
+	- /^support\/.*$/
 
 install:
   - go get golang.org/x/tools/cmd/vet
