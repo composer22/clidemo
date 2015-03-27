@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -23,8 +24,7 @@ type Server struct {
 	running  bool           // Is the server running?
 	jobq     chan *parseJob // Channel to send jobs.
 	wg       sync.WaitGroup // Synchronize close() of job channel.
-	start    time.Time      // The start time of the server.
-	stats                   // Server statistics since it started.
+	stats    *Status        // Server statistics since it started.
 }
 
 // Info provides basic information about the server.
@@ -35,9 +35,10 @@ type Info struct {
 }
 
 // stats contains runtime statistics.
-type stats struct {
-	requestCount int64 // How many requests came in to the server.
-	inBytes      int64 // Size of the requests in bytes.
+type Status struct {
+	Start        time.Time `json:"startTime"`    // The start time of the server.
+	RequestCount int64     `json:"requestCount"` // How many requests came in to the server.
+	InBytes      int64     `json:"inBytes"`      // Size of the requests in bytes.
 }
 
 // New is a factory function that returns a new server instance.
@@ -56,14 +57,19 @@ func New(opts *Options) *Server {
 		log.Fatalf("[FATAL] Error marshalling info json: %+v", err)
 	}
 
+	// Stat information.
+	st := &Status{
+		Start: time.Now(),
+	}
+
 	// Construct server.
 	s := &Server{
 		info:     info,
-		infoJSON: []byte(fmt.Sprintf("{\"info\":%s}", b)),
+		infoJSON: b,
 		opts:     opts,
 		jobq:     make(chan *parseJob),
+		stats:    st,
 		running:  false,
-		start:    time.Now(),
 	}
 	return s
 }
@@ -78,20 +84,23 @@ func PrintVersionAndExit() {
 func (s *Server) Start() {
 	log.Printf("[INFO] Starting clidemo version %s\n", version)
 	s.mu.Lock()
-	s.start = time.Now()
+	s.stats.Start = time.Now()
 	s.running = true
 	s.mu.Unlock()
 
+	// Spin off the worker processes.
 	for i := 0; i < s.opts.MaxConn; i++ {
 		s.wg.Add(1)
 		go parseWorker(s.jobq, &s.wg)
 	}
 
+	// Setup the routes and middleware, and serve.
 	mux := http.NewServeMux()
 	mux.HandleFunc(httpRouteAliveV1, s.aliveHandler)
 	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
 	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", s.opts.Port), mux)
+	mw := &middlewarePreprocess{serv: s, handler: mux}
+	err := http.ListenAndServe(fmt.Sprintf(":%d", s.opts.Port), mw)
 	if err != nil {
 		fmt.Printf("[FATAL] %s\n", err)
 		os.Exit(1)
@@ -120,20 +129,14 @@ func (s *Server) handleSignals() {
 
 // aliveHandler handles a client "is the server alive" request.
 func (s *Server) aliveHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Validate request header.
-	if s.invalidHeader(w, r, httpGet) {
+	if s.invalidMethod(w, r, httpGet) {
 		return
 	}
-
-	s.initResponseHeader(w)
 }
 
 // parseHandler handles a parse request from the client and returns a json result.
 func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Validate request header.
-	if s.invalidHeader(w, r, httpGet) {
+	if s.invalidMethod(w, r, httpGet) {
 		return
 	}
 
@@ -143,16 +146,16 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 	buf.ReadFrom(r.Body)
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		s.errorHandler(w, r, invalidBody, http.StatusBadRequest)
+		http.Error(w, invalidBody, http.StatusBadRequest)
 		return
 	}
 	if err := json.Unmarshal(b, &data); err != nil {
-		s.errorHandler(w, r, invalidJSONText, http.StatusBadRequest)
+		http.Error(w, invalidJSONText, http.StatusBadRequest)
 		return
 	}
 	d, e := data["text"].(string)
 	if e {
-		s.errorHandler(w, r, invalidJSONAttribute, http.StatusBadRequest)
+		http.Error(w, invalidJSONAttribute, http.StatusBadRequest)
 	}
 
 	// Send a parse request to a parse worker.
@@ -163,41 +166,30 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 	s.jobq <- &job
 	<-job.DoneCh
 
-	s.initResponseHeader(w)
 	w.Write([]byte(job.ResultJSON))
 }
 
-// statusHandler handles a client request for server status information.
+// statusHandler handles a client request for server information and statistics.
 func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Validate request header.
-	if s.invalidHeader(w, r, httpGet) {
+	if s.invalidMethod(w, r, httpGet) {
 		return
 	}
 
-	// TODO Handle statistics and information
-	s.initResponseHeader(w)
-	// TODO w.Write()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	st, _ := json.Marshal(s.stats)
+	w.Write([]byte(fmt.Sprintf(`{"info":%s,"stats":%s}`, s.infoJSON, st)))
 }
 
-// errorHandler wraps a standard response for any invalid condition found by the other http handlers.
-func (s *Server) errorHandler(w http.ResponseWriter, r *http.Request, message string, status int) {
-	s.initResponseHeader(w)
-	w.WriteHeader(status)
-	if message != "" {
-		fmt.Fprintf(w, `{"error":"%s"}`, message)
+// incrementStats increments the statistics for the request being handled by the server.
+func (s *Server) incrementStats(r *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.stats.RequestCount++
+	cl, err := strconv.Atoi(r.Header.Get("Content-Length"))
+	if err == nil {
+		s.stats.InBytes += int64(cl)
 	}
-}
-
-// invalidHeader validates that the header information is acceptable for processing the request from the client.
-func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request, method string) bool {
-	if r.Method != method ||
-		r.Header.Get("Content-Type") != "application/json" ||
-		r.Header.Get("Accept") != "application/json" {
-		s.errorHandler(w, r, invalidMediaType, http.StatusUnsupportedMediaType)
-		return true
-	}
-	return false
 }
 
 // initResponseHeader sets up the common http response headers for the return of all json calls.
@@ -208,6 +200,24 @@ func (s *Server) initResponseHeader(w http.ResponseWriter) {
 		w.Header().Add("Server", s.opts.Name)
 	}
 	w.Header().Add("X-Request-ID", createV4UUID())
+}
+
+// invalidHeader validates that the header information is acceptable for processing the request from the client.
+func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request) bool {
+	if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("Accept") != "application/json" {
+		http.Error(w, invalidMediaType, http.StatusUnsupportedMediaType)
+		return true
+	}
+	return false
+}
+
+// invalidMethod validates that the http method is acceptable for processing this route.
+func (s *Server) invalidMethod(w http.ResponseWriter, r *http.Request, method string) bool {
+	if r.Method != method {
+		http.Error(w, invalidMediaType, http.StatusUnsupportedMediaType)
+		return true
+	}
+	return false
 }
 
 // isRunning returns a boolean representing whether the server is running or not.

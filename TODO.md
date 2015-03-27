@@ -3,8 +3,16 @@
 
 - [ ] Global testing (not done)
 - [ ] More test rollout of source
+- [ ] Better Logging
+- [ ] Log All Requests
+- [ ] Signal Interrupts
+- [ ] True connection throttling
 - [ ] Docker support
-- [ ] Travis CI support
-- [ ] Better route, header error checking
+- [ ] Socket Support
+- [ ] Captn-Proto
+- [x] Travis CI support
+- [x] Better route, header error checking
+- [ ] oAuth support
+- [ ] Database integration BOLT, mySQL
 - [ ] pperf integration
-- [ ] Alternate text parsing such as Lua
+- [ ] Alternate text parsing such as LuaJIT

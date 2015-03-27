@@ -80,7 +80,21 @@ Content-Type: application/json
 
 Accept: application/json
 
-URL:
+Example cURL:
+
+```
+
+$  curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET "http://localhost:8080/v1.0/alive"
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+Date: Fri, 27 Mar 2015 20:26:23 +0000
+Server: San Francisco
+X-Request-Id: 6907BAC6-24C4-4B66-983F-230DDC18D22F
+Content-Length: 0
+
+```
+
+URL Endpoints:
 
 http://localhost:49152/v1.0/alive - GET Is the server alive?
 
