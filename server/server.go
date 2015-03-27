@@ -1,5 +1,4 @@
-// Package server implements a simple server to return concordance (word count + sentence
-// location) for sample text.
+// Package server implements a simple server to return concordance (word count + sentence location) for sample text.
 package server
 
 import (
@@ -66,7 +65,6 @@ func New(opts *Options) *Server {
 		running:  false,
 		start:    time.Now(),
 	}
-
 	return s
 }
 
@@ -78,7 +76,7 @@ func PrintVersionAndExit() {
 
 // Start spins up the server to accept incoming connections.
 func (s *Server) Start() {
-	log.Printf("Starting clidemo version %s\n", version)
+	log.Printf("[INFO] Starting clidemo version %s\n", version)
 	s.mu.Lock()
 	s.start = time.Now()
 	s.running = true
@@ -93,7 +91,11 @@ func (s *Server) Start() {
 	mux.HandleFunc(httpRouteAliveV1, s.aliveHandler)
 	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
 	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
-	http.ListenAndServe(":"+string(s.opts.Port), mux)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", s.opts.Port), mux)
+	if err != nil {
+		fmt.Printf("[FATAL] %s\n", err)
+		os.Exit(1)
+	}
 }
 
 // handleSignals responds to operating system interrupts such as application kills.
@@ -119,19 +121,19 @@ func (s *Server) handleSignals() {
 // aliveHandler handles a client "is the server alive" request.
 func (s *Server) aliveHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Validate request route and header.
-	if s.invalidURLPath(w, r, httpRouteAliveV1) || s.invalidHeader(w, r, httpGet) {
+	// Validate request header.
+	if s.invalidHeader(w, r, httpGet) {
 		return
 	}
+
 	s.initResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
 }
 
 // parseHandler handles a parse request from the client and returns a json result.
 func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Validate request route and header.
-	if s.invalidURLPath(w, r, httpRouteParseV1) || s.invalidHeader(w, r, httpGet) {
+	// Validate request header.
+	if s.invalidHeader(w, r, httpGet) {
 		return
 	}
 
@@ -141,16 +143,16 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 	buf.ReadFrom(r.Body)
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		s.errorHandler(w, r, http.StatusBadRequest)
+		s.errorHandler(w, r, invalidBody, http.StatusBadRequest)
 		return
 	}
 	if err := json.Unmarshal(b, &data); err != nil {
-		s.errorHandler(w, r, http.StatusBadRequest)
+		s.errorHandler(w, r, invalidJSONText, http.StatusBadRequest)
 		return
 	}
 	d, e := data["text"].(string)
 	if e {
-		s.errorHandler(w, r, http.StatusBadRequest)
+		s.errorHandler(w, r, invalidJSONAttribute, http.StatusBadRequest)
 	}
 
 	// Send a parse request to a parse worker.
@@ -168,50 +170,43 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 // statusHandler handles a client request for server status information.
 func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Validate request route and header.
-	if s.invalidURLPath(w, r, httpRouteStatusV1) || s.invalidHeader(w, r, httpGet) {
+	// Validate request header.
+	if s.invalidHeader(w, r, httpGet) {
 		return
 	}
+
+	// TODO Handle statistics and information
 	s.initResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
+	// TODO w.Write()
 }
 
-// errorHandler wraps a standard response for any invalid condition found by the other http
-// handlers.
-func (s *Server) errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+// errorHandler wraps a standard response for any invalid condition found by the other http handlers.
+func (s *Server) errorHandler(w http.ResponseWriter, r *http.Request, message string, status int) {
+	s.initResponseHeader(w)
 	w.WriteHeader(status)
-	if status == http.StatusNotFound {
-		fmt.Fprint(w, "Path was not found")
+	if message != "" {
+		fmt.Fprintf(w, `{"error":"%s"}`, message)
 	}
 }
 
-// invalidURLPath validates that the URL path is acceptable for processing the request from
-// the client.
-func (s *Server) invalidURLPath(w http.ResponseWriter, r *http.Request, path string) bool {
-	if r.URL.Path != path {
-		s.errorHandler(w, r, http.StatusNotFound)
-		return true
-	}
-	return false
-}
-
-// invalidHeader validates that the header information is acceptable for processing the
-// request from the client.
+// invalidHeader validates that the header information is acceptable for processing the request from the client.
 func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request, method string) bool {
 	if r.Method != method ||
 		r.Header.Get("Content-Type") != "application/json" ||
 		r.Header.Get("Accept") != "application/json" {
-		s.errorHandler(w, r, http.StatusUnsupportedMediaType)
+		s.errorHandler(w, r, invalidMediaType, http.StatusUnsupportedMediaType)
 		return true
 	}
 	return false
 }
 
-// initResponseHeader sets up the common http response headers for the return of a json call.
+// initResponseHeader sets up the common http response headers for the return of all json calls.
 func (s *Server) initResponseHeader(w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json;charset=utf-8")
 	w.Header().Add("Date", time.Now().UTC().Format(time.RFC1123Z))
-	w.Header().Add("Server", s.opts.Name)
+	if s.opts.Name != "" {
+		w.Header().Add("Server", s.opts.Name)
+	}
 	w.Header().Add("X-Request-ID", createV4UUID())
 }
 

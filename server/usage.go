@@ -14,7 +14,7 @@ Usage: clidemo [options...] [input_filename]
 Server options:
     -N, --name NAME                  NAME of the server
     -p, --port PORT                  PORT to listen on (default: 49152)
-    -n, --connections MAX            MAX server connections allowed (default: 4)
+    -n, --connections MAX            MAX server connections allowed (default: 1000)
     -X, --procs MAX                  MAX processor cores to use from the machine (default: 0)
 	                                 Anything <= 0 is no change to the environment.
     -d, --debug                      Enable debugging output (default: false)
@@ -29,7 +29,7 @@ Common options:
 Examples:
 
     # Server mode activated on port 8080; 10 conns; 2 processors
-    clidemo -N Washington -p 8080 -n 10 -X 2
+    clidemo -N "San Francisco" -p 8080 -n 10 -X 2
 
 	# File input using -f flag with debug option
 	clidemo -f /tmp/inputfiles/foo/bar.txt -d > out.txt
