@@ -13,7 +13,8 @@ const (
 	httpRouteAliveV1  = "/v1.0/alive"
 	httpRouteParseV1  = "/v1.0/parse"
 	httpRouteStatusV1 = "/v1.0/status"
-	httpGet           = "GET"
+
+	httpGet = "GET"
 
 	// error messages
 
