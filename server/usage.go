@@ -29,7 +29,7 @@ Common options:
 Examples:
 
     # Server mode activated on port 8080; 10 conns; 2 processors
-    clidemo -N Washington -p 8080 -n 10 -X 2
+    clidemo -N "San Francisco" -p 8080 -n 10 -X 2
 
 	# File input using -f flag with debug option
 	clidemo -f /tmp/inputfiles/foo/bar.txt -d > out.txt

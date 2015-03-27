@@ -33,7 +33,7 @@ Common options:
 Examples:
 
     # Server mode activated as "Washington" on port 8080; 10 conns; 2 processors
-    clidemo -N Washington -p 8080 -n 10 -X 2
+    clidemo -N "San Francisco" -p 8080 -n 10 -X 2
 
 	# File input using -f flag with debug option
 	clidemo -f /tmp/inputfiles/foo/bar.txt -d > out.txt
@@ -82,12 +82,12 @@ Accept: application/json
 
 URL:
 
-http://localhost:49152/v1.0/alive/ - GET Is the server alive?
+http://localhost:49152/v1.0/alive - GET Is the server alive?
 
-http://localhost:49152/v1.0/parse/ - GET Submit a parse request to the server.
+http://localhost:49152/v1.0/parse - GET Submit a parse request to the server.
                                       Body should contain {"text":"<your text to parse>"}
 
-http://localhost:49152/v1.0/status/ - GET Returns information about the server.
+http://localhost:49152/v1.0/status - GET Returns information about the server.
 
 ## License
 

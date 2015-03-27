@@ -17,7 +17,7 @@ import (
 
 // configureLogging configures logging for the application run.
 func configureLogging() {
-	log.SetFlags(log.Lmicroseconds)
+	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
 }
 
 // configureServerEnvironment configures the physical and logical server components for the application run.
@@ -25,7 +25,7 @@ func configureServerEnvironment(opts *server.Options) {
 	if opts.MaxProcs > 0 {
 		runtime.GOMAXPROCS(opts.MaxProcs)
 	}
-	log.Printf("INFO: NumCPU %d GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))
+	log.Printf("[INFO] NumCPU %d GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))
 }
 
 // main is the main entry point for the application or server launch.
@@ -84,7 +84,7 @@ func main() {
 	switch {
 
 	// Piped input text (higher priority than command line file names or server mode).
-	case fi.Mode()&os.ModeNamedPipe == 1:
+	case fi.Mode()&os.ModeNamedPipe != 0:
 		p := parser.New()
 		p.Execute(bufio.NewReader(os.Stdin))
 		fmt.Print(p)
