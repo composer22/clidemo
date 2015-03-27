@@ -17,7 +17,7 @@ Usage: clidemo [options...] [input_filename]
 Server options:
     -N, --name NAME                  NAME of the server
     -p, --port PORT                  PORT to listen on (default: 49152)
-    -n, --connections MAX            MAX server connections allowed (default: 4)
+    -n, --connections MAX            MAX server connections allowed (default: 1000)
     -X, --procs MAX                  MAX processor cores to use from the machine
 									   Anything <= 0 is no change to the environment.
 									   (default: 0)
