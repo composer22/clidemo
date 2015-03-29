@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	log = logger.New(-1, false, nil)
+	log = logger.New(-1, false)
 }
 
 // configureServerEnvironment configures the physical and logical server components for the application run.

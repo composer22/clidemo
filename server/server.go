@@ -49,7 +49,7 @@ type Status struct {
 
 // New is a factory function that returns a new server instance.
 func New(opts *Options) *Server {
-	log := logger.New(-1, false, nil)
+	log := logger.New(-1, false)
 
 	// Server information.
 	info := &Info{

@@ -10,8 +10,7 @@ import (
 )
 
 func TestSetAndGetLogLevel(t *testing.T) {
-	l := New(Debug, false, nil)
-	l.SetLogLevel(Debug)
+	l := New(Debug, false)
 	if l.GetLogLevel() != Debug {
 		t.Fatalf("Invalid Log Level Set.\n")
 	}
@@ -26,14 +25,25 @@ func TestSetAndGetLogLevel(t *testing.T) {
 }
 
 func TestDefaultSetLogLevel(t *testing.T) {
-	l := New(-1, false, nil)
+	l := New(-1, false)
 	if l.GetLogLevel() != Info {
 		t.Fatalf("Invalid default Log Level Set.\n")
 	}
 }
 
+func TestSetErrorFunc(t *testing.T) {
+	l := New(Debug, false)
+	if err := l.SetExitFunc(nil); err == nil {
+		t.Fatalf("Invalid set exit function with nil.\n")
+	}
+
+	if err := l.SetExitFunc(func(code int) {}); err != nil {
+		t.Fatalf("Invalid set exit function with vald value.\n")
+	}
+}
+
 func TestSetColourLabels(t *testing.T) {
-	l := New(-1, true, nil)
+	l := New(-1, true)
 	for i, actual := range l.labels {
 		var colour int
 		switch i {
@@ -58,7 +68,8 @@ func TestSetColourLabels(t *testing.T) {
 func TestEmergencyf(t *testing.T) {
 	test_message := "Emergencyf"
 	expectOutput(t, func() {
-		l := New(Debug, false, func(code int) {}) // Mock the exit so coverage can complete.
+		l := New(Debug, false) // Mock the exit so coverage can complete.
+		l.exit = func(code int) {}
 		l.Emergencyf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Emergency], test_message))
 }
@@ -66,7 +77,7 @@ func TestEmergencyf(t *testing.T) {
 func TestAlertf(t *testing.T) {
 	test_message := "Alertf"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Alertf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Alert], test_message))
 }
@@ -74,7 +85,7 @@ func TestAlertf(t *testing.T) {
 func TestCriticalf(t *testing.T) {
 	test_message := "Criticalf"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Criticalf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Critical], test_message))
 }
@@ -82,7 +93,7 @@ func TestCriticalf(t *testing.T) {
 func TestErrorf(t *testing.T) {
 	test_message := "Errorf"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Errorf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Error], test_message))
 }
@@ -90,7 +101,7 @@ func TestErrorf(t *testing.T) {
 func TestWarningf(t *testing.T) {
 	test_message := "Warningf"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Warningf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Warning], test_message))
 }
@@ -98,7 +109,7 @@ func TestWarningf(t *testing.T) {
 func TestNoticef(t *testing.T) {
 	test_message := "Noticef"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Noticef(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Notice], test_message))
 }
@@ -106,7 +117,7 @@ func TestNoticef(t *testing.T) {
 func TestInfof(t *testing.T) {
 	test_message := "Infof"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Infof(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Info], test_message))
 }
@@ -114,7 +125,7 @@ func TestInfof(t *testing.T) {
 func TestDebugf(t *testing.T) {
 	test_message := "Debugf"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Debugf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Debug], test_message))
 }
@@ -123,7 +134,7 @@ func TestOutputf(t *testing.T) {
 	test_label := "[OUTPUT] "
 	test_message := "Output"
 	expectOutput(t, func() {
-		l := New(Debug, false, nil)
+		l := New(Debug, false)
 		l.Output(-1, test_label, test_message)
 	}, fmt.Sprintf("%s%s\n", "[OUTPUT] ", test_message))
 }

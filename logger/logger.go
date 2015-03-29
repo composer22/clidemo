@@ -65,20 +65,17 @@ type Logger struct {
 }
 
 // New is a factory method to return a new logger instance.
-func New(level int, colours bool, exitF exiter) *Logger {
+func New(level int, colours bool) *Logger {
 	flags := log.Lshortfile | log.Ldate | log.Lmicroseconds
 	pre := fmt.Sprintf("[%d] ", os.Getpid())
 	if level < 0 {
 		level = Info
 	}
-	if exitF == nil {
-		exitF = func(code int) { os.Exit(code) }
-	}
 
 	l := &Logger{
 		logger: log.New(os.Stdout, pre, flags),
 		level:  level,
-		exit:   exitF,
+		exit:   func(code int) { os.Exit(code) },
 	}
 
 	if colours {
@@ -96,6 +93,15 @@ func (l *Logger) SetLogLevel(logLevel int) error {
 		return errors.New(fmt.Sprintf("%d log level arg is not in valid range.", logLevel))
 	}
 	l.level = logLevel
+	return nil
+}
+
+// SetExitFunc allows a user to set the exit function of the
+func (l *Logger) SetExitFunc(exitF exiter) error {
+	if exitF == nil {
+		return errors.New("Exit function is manadatory.")
+	}
+	l.exit = exitF
 	return nil
 }
 
