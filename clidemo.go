@@ -6,18 +6,22 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/composer22/clidemo/logger"
 	"github.com/composer22/clidemo/parser"
 	"github.com/composer22/clidemo/server"
 )
 
-// configureLogging configures logging for the application run.
-func configureLogging() {
-	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
+var (
+	log *logger.Logger
+)
+
+func init() {
+	log = logger.New(-1, false)
+	log.SetLogLevel(logger.Info)
 }
 
 // configureServerEnvironment configures the physical and logical server components for the application run.
@@ -25,11 +29,13 @@ func configureServerEnvironment(opts *server.Options) {
 	if opts.MaxProcs > 0 {
 		runtime.GOMAXPROCS(opts.MaxProcs)
 	}
-	log.Printf("[INFO] NumCPU %d GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))
+
+	log.Infof("NumCPU %d GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))
 }
 
 // main is the main entry point for the application or server launch.
 func main() {
+
 	opts := server.Options{}
 	var showVersion bool
 	var fileIn string
@@ -38,10 +44,11 @@ func main() {
 	flag.StringVar(&opts.Name, "--name", "", "Name of the server")
 	flag.IntVar(&opts.Port, "P", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.Port, "--port", server.DefaultPort, "Port to listen on (default: 49152)")
-	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections,
-		"Maximum server connections allowed (default: 4)")
+	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections, "Maximum server connections allowed (default: 1000)")
 	flag.IntVar(&opts.MaxConn, "--connections", server.DefaultMaxConnections,
-		"Maximum server connections allowed (default: 4)")
+		"Maximum server connections allowed (default: 1000)")
+	flag.IntVar(&opts.MaxWorkers, "W", server.DefaultMaxWorkers, "Maximum running workers allowed (default: 1000)")
+	flag.IntVar(&opts.MaxWorkers, "--workers", server.DefaultMaxWorkers, "Maximum running workers allowed (default: 1000)")
 	flag.IntVar(&opts.MaxProcs, "X", server.DefaultMaxProcs,
 		"Maximum processor cores to use from the machine (default: <= 0 is no change")
 	flag.IntVar(&opts.MaxProcs, "--procs", server.DefaultMaxProcs,
@@ -75,10 +82,8 @@ func main() {
 	// Get any stats we need for checking piped input.
 	fi, err := os.Stdin.Stat()
 	if err != nil {
-		log.Fatalln("[FATAL] os.Stdin.Stat(): ", err)
+		log.Emergencyf(true, "os.Stdin.Stat(): ", err)
 	}
-
-	configureLogging()
 
 	// Lets do work as a service or on direct input.
 	switch {
@@ -93,7 +98,7 @@ func main() {
 	case fileIn != "":
 		fi, err := os.Open(fileIn)
 		if err != nil {
-			log.Fatalln("[FATAL] Cannot open file ", fileIn, ": ", err)
+			log.Emergencyf(true, "Cannot open file ", fileIn, ": ", err)
 		}
 		defer fi.Close()
 		p := parser.New()
