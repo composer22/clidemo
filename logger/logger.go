@@ -65,16 +65,20 @@ type Logger struct {
 }
 
 // New is a factory method to return a new logger instance.
-func New(level int, colours bool) *Logger {
+func New(level int, colours bool, exitF exiter) *Logger {
 	flags := log.Lshortfile | log.Ldate | log.Lmicroseconds
 	pre := fmt.Sprintf("[%d] ", os.Getpid())
 	if level < 0 {
 		level = Info
 	}
+	if exitF == nil {
+		exitF = func(code int) { os.Exit(code) }
+	}
+
 	l := &Logger{
 		logger: log.New(os.Stdout, pre, flags),
 		level:  level,
-		exit:   func(code int) { os.Exit(code) },
+		exit:   exitF,
 	}
 
 	if colours {
