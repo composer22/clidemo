@@ -65,7 +65,7 @@ func New(level int, colours bool) *Logger {
 	flags := log.Lshortfile | log.Ldate | log.Lmicroseconds
 	pre := fmt.Sprintf("[%d] ", os.Getpid())
 	if level < 0 {
-		level = Warning
+		level = Info
 	}
 	l := &Logger{
 		logger: log.New(os.Stdout, pre, flags),
@@ -117,12 +117,7 @@ func (l *Logger) SetColouredLabels() {
 		default:
 			colour = foregroundDefault
 		}
-
-		if colour > 0 {
-			l.labels = append(l.labels, fmt.Sprintf(colourFormat, colour, lbl))
-		} else {
-			l.labels = append(l.labels, lbl)
-		}
+		l.labels = append(l.labels, fmt.Sprintf(colourFormat, colour, lbl))
 	}
 }
 

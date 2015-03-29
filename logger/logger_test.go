@@ -25,6 +25,36 @@ func TestSetAndGetLogLevel(t *testing.T) {
 	}
 }
 
+func TestDefaultSetLogLevel(t *testing.T) {
+	l := New(-1, false)
+	if l.GetLogLevel() != Info {
+		t.Fatalf("Invalid default Log Level Set.\n")
+	}
+}
+
+func TestSetColourLabels(t *testing.T) {
+	l := New(-1, true)
+	for i, actual := range l.labels {
+		var colour int
+		switch i {
+		case Emergency, Alert, Critical, Error:
+			colour = foregroundRed
+		case Warning:
+			colour = foregroundYellow
+		case Notice:
+			colour = foregroundGreen
+		case Debug:
+			colour = foregroundBlue
+		default:
+			colour = foregroundDefault
+		}
+		expected := fmt.Sprintf(colourFormat, colour, labels[i])
+		if expected != actual {
+			t.Fatalf("Invalid colour label\nExpected:%s\nActual:%s\n", expected, actual)
+		}
+	}
+}
+
 func TestEmergencyf(t *testing.T) {
 	test_message := "Emergencyf"
 	expectOutput(t, func() {
