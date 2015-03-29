@@ -18,6 +18,7 @@ Server options:
     -N, --name NAME                  NAME of the server
     -p, --port PORT                  PORT to listen on (default: 49152)
     -n, --connections MAX            MAX server connections allowed (default: 1000)
+    -W, --workers MAX                MAX running workers allowed (default: 1000)
     -X, --procs MAX                  MAX processor cores to use from the machine
 									   Anything <= 0 is no change to the environment.
 									   (default: 0)
@@ -32,8 +33,8 @@ Common options:
 
 Examples:
 
-    # Server mode activated as "Washington" on port 8080; 10 conns; 2 processors
-    clidemo -N "San Francisco" -p 8080 -n 10 -X 2
+    # Server mode activated as "Washington" on port 8080; 10 conns; 30 workers; 2 processors
+    clidemo -N "San Francisco" -p 8080 -n 10 -W 30 -X 2
 
 	# File input using -f flag with debug option
 	clidemo -f /tmp/inputfiles/foo/bar.txt -d > out.txt

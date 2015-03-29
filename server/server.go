@@ -2,36 +2,40 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"sync"
 	"time"
+
+	"github.com/composer22/clidemo/logger"
 )
 
 // Server is the main structure that represents a server instance.
 type Server struct {
-	mu       sync.Mutex     // For locking access to server params.
-	info     Info           // Basic server information.
-	infoJSON []byte         // Basic server information as json.
-	opts     *Options       // Original options and info for creating the server.
-	running  bool           // Is the server running?
-	jobq     chan *parseJob // Channel to send jobs.
-	wg       sync.WaitGroup // Synchronize close() of job channel.
-	stats    *Status        // Server statistics since it started.
+	mu      sync.Mutex     // For locking access to server params.
+	info    *Info          // Basic server information.
+	opts    *Options       // Original options and info for creating the server.
+	running bool           // Is the server running?
+	log     *logger.Logger // Log instance for recording error and other messages.
+	jobq    chan *parseJob // Channel to send jobs.
+	wg      sync.WaitGroup // Synchronize close() of job channel.
+	stats   *Status        // Server statistics since it started.
 }
 
-// Info provides basic information about the server.
+// Info provides basic information about the running server.
 type Info struct {
-	UUID    string `json:"UUID"`    // Unique ID of the server.
-	Version string `json:"version"` // Version of the server.
-	Port    int    `json:"port"`    // Port the server is listening on.
+	Version    string `json:"version"`        // Version of the server.
+	Name       string `json:"name"`           // The name of the server.
+	UUID       string `json:"UUID"`           // Unique ID of the server.
+	Port       int    `json:"port"`           // Port the server is listening on.
+	MaxConn    int    `json:"maxConnections"` // The maximum concurrent connections accepted.
+	MaxWorkers int    `json:"maxWorkers"`     // The maximum numer of workers allowed to run.
+	Debug      bool   `json:"debugEnabled"`   // Is debugging enabled on the server.
+
 }
 
 // stats contains runtime statistics.
@@ -43,18 +47,17 @@ type Status struct {
 
 // New is a factory function that returns a new server instance.
 func New(opts *Options) *Server {
+	log := logger.New(logger.Info, false)
 
 	// Server information.
-	info := Info{
-		UUID:    createV4UUID(),
-		Version: version,
-		Port:    opts.Port,
-	}
-
-	// Create json version of the info.
-	b, err := json.Marshal(info)
-	if err != nil {
-		log.Fatalf("[FATAL] Error marshalling info json: %+v", err)
+	info := &Info{
+		Version:    version,
+		Name:       opts.Name,
+		UUID:       createV4UUID(),
+		Port:       opts.Port,
+		MaxConn:    opts.MaxConn,
+		MaxWorkers: opts.MaxWorkers,
+		Debug:      opts.Debug,
 	}
 
 	// Stat information.
@@ -64,13 +67,18 @@ func New(opts *Options) *Server {
 
 	// Construct server.
 	s := &Server{
-		info:     info,
-		infoJSON: b,
-		opts:     opts,
-		jobq:     make(chan *parseJob),
-		stats:    st,
-		running:  false,
+		info:    info,
+		opts:    opts,
+		jobq:    make(chan *parseJob),
+		log:     log,
+		stats:   st,
+		running: false,
 	}
+
+	if s.info.Debug {
+		s.log.SetLogLevel(logger.Debug)
+	}
+
 	return s
 }
 
@@ -82,14 +90,14 @@ func PrintVersionAndExit() {
 
 // Start spins up the server to accept incoming connections.
 func (s *Server) Start() {
-	log.Printf("[INFO] Starting clidemo version %s\n", version)
+	s.log.Infof("Starting clidemo version %s\n", version)
 	s.mu.Lock()
 	s.stats.Start = time.Now()
 	s.running = true
 	s.mu.Unlock()
 
 	// Spin off the worker processes.
-	for i := 0; i < s.opts.MaxConn; i++ {
+	for i := 0; i < s.info.MaxWorkers; i++ {
 		s.wg.Add(1)
 		go parseWorker(s.jobq, &s.wg)
 	}
@@ -100,10 +108,9 @@ func (s *Server) Start() {
 	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
 	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
 	mw := &middlewarePreprocess{serv: s, handler: mux}
-	err := http.ListenAndServe(fmt.Sprintf(":%d", s.opts.Port), mw)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", s.info.Port), mw)
 	if err != nil {
-		fmt.Printf("[FATAL] %s\n", err)
-		os.Exit(1)
+		s.log.Emergencyf(true, "%s\n", err)
 	}
 }
 
@@ -114,14 +121,14 @@ func (s *Server) handleSignals() {
 	go func() {
 		for sig := range c {
 			s.mu.Lock()
-			if s.opts.Debug {
-				log.Printf("[DEBUG] Trapped signal: %v\n", sig)
+			if s.info.Debug {
+				s.log.Debugf("Trapped signal: %v\n", sig)
 			}
 			s.mu.Unlock()
-			log.Println("[INFO] Server closing all jobs...")
+			s.log.Infof("Server closing all jobs.")
 			close(s.jobq)
 			s.wg.Wait()
-			log.Println("[INFO] Server exiting...")
+			s.log.Infof("Server exiting.")
 			os.Exit(0)
 		}
 	}()
@@ -142,8 +149,6 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Read the json in for the request.
 	var data map[string]interface{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, invalidBody, http.StatusBadRequest)
@@ -177,8 +182,10 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	inf, _ := json.Marshal(s.info)
+	op, _ := json.Marshal(s.opts)
 	st, _ := json.Marshal(s.stats)
-	w.Write([]byte(fmt.Sprintf(`{"info":%s,"stats":%s}`, s.infoJSON, st)))
+	w.Write([]byte(fmt.Sprintf(`{"info":%s,"options":%s,"stats":%s}`, inf, op, st)))
 }
 
 // incrementStats increments the statistics for the request being handled by the server.
@@ -186,20 +193,21 @@ func (s *Server) incrementStats(r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stats.RequestCount++
-	cl, err := strconv.Atoi(r.Header.Get("Content-Length"))
+	b, err := ioutil.ReadAll(r.Body)
 	if err == nil {
-		s.stats.InBytes += int64(cl)
+		s.stats.InBytes += int64(len(b))
 	}
 }
 
 // initResponseHeader sets up the common http response headers for the return of all json calls.
 func (s *Server) initResponseHeader(w http.ResponseWriter) {
-	w.Header().Add("Content-Type", "application/json;charset=utf-8")
-	w.Header().Add("Date", time.Now().UTC().Format(time.RFC1123Z))
-	if s.opts.Name != "" {
-		w.Header().Add("Server", s.opts.Name)
+	header := w.Header()
+	header.Add("Content-Type", "application/json;charset=utf-8")
+	header.Add("Date", time.Now().UTC().Format(time.RFC1123Z))
+	if s.info.Name != "" {
+		header.Add("Server", s.info.Name)
 	}
-	w.Header().Add("X-Request-ID", createV4UUID())
+	header.Add("X-Request-ID", createV4UUID())
 }
 
 // invalidHeader validates that the header information is acceptable for processing the request from the client.

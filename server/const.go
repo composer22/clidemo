@@ -3,7 +3,8 @@ package server
 const (
 	version               = "0.1.0" // Application and server version.
 	DefaultPort           = 49152   // Port to receive requests: see IANA Port Numbers.
-	DefaultMaxConnections = 1000    // Maximum number of concurrent connections allowed.
+	DefaultMaxConnections = 1000    // Maximum number of connections allowed.
+	DefaultMaxWorkers     = 1000    // Maximum number of running workers allowed.
 	DefaultMaxProcs       = 0       // Maximum number of computer processors to utilize.*
 
 	// * zeros = no change
@@ -14,7 +15,13 @@ const (
 	httpRouteParseV1  = "/v1.0/parse"
 	httpRouteStatusV1 = "/v1.0/status"
 
-	httpGet = "GET"
+	httpGet    = "GET"
+	httpPost   = "POST"
+	httpPut    = "PUT"
+	httpDelete = "DELETE"
+	httpHead   = "HEAD"
+	httpTrace  = "TRACE"
+	httpPatch  = "PATCH"
 
 	// error messages
 
