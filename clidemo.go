@@ -21,7 +21,6 @@ var (
 
 func init() {
 	log = logger.New(-1, false)
-	log.SetLogLevel(logger.Info)
 }
 
 // configureServerEnvironment configures the physical and logical server components for the application run.
@@ -82,7 +81,7 @@ func main() {
 	// Get any stats we need for checking piped input.
 	fi, err := os.Stdin.Stat()
 	if err != nil {
-		log.Emergencyf(true, "os.Stdin.Stat(): ", err)
+		log.Emergencyf("os.Stdin.Stat(): ", err)
 	}
 
 	// Lets do work as a service or on direct input.
@@ -98,7 +97,7 @@ func main() {
 	case fileIn != "":
 		fi, err := os.Open(fileIn)
 		if err != nil {
-			log.Emergencyf(true, "Cannot open file ", fileIn, ": ", err)
+			log.Emergencyf("Cannot open file ", fileIn, ": ", err)
 		}
 		defer fi.Close()
 		p := parser.New()

@@ -60,7 +60,8 @@ func TestEmergencyf(t *testing.T) {
 	expectOutput(t, func() {
 		l := New(Debug, false)
 		l.SetLogLevel(Debug)
-		l.Emergencyf(false, test_message)
+		l.exit = func(code int) {} // Mock the exit so coverage can complete.
+		l.Emergencyf(test_message)
 	}, fmt.Sprintf("%s%s\n", labels[Emergency], test_message))
 }
 

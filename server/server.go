@@ -16,14 +16,15 @@ import (
 
 // Server is the main structure that represents a server instance.
 type Server struct {
-	mu      sync.Mutex     // For locking access to server params.
-	info    *Info          // Basic server information.
-	opts    *Options       // Original options and info for creating the server.
-	running bool           // Is the server running?
-	log     *logger.Logger // Log instance for recording error and other messages.
-	jobq    chan *parseJob // Channel to send jobs.
-	wg      sync.WaitGroup // Synchronize close() of job channel.
-	stats   *Status        // Server statistics since it started.
+	mu      sync.Mutex            // For locking access to server params.
+	info    *Info                 // Basic server information.
+	opts    *Options              // Original options and info for creating the server.
+	running bool                  // Is the server running?
+	log     *logger.Logger        // Log instance for recording error and other messages.
+	jobq    chan *parseJob        // Channel to send jobs.
+	mw      *middlewarePreprocess // Handler for all incomping routes
+	wg      sync.WaitGroup        // Synchronize close() of job channel.
+	stats   *Status               // Server statistics since it started.
 }
 
 // Info provides basic information about the running server.
@@ -40,14 +41,15 @@ type Info struct {
 
 // stats contains runtime statistics.
 type Status struct {
-	Start        time.Time `json:"startTime"`    // The start time of the server.
-	RequestCount int64     `json:"requestCount"` // How many requests came in to the server.
-	InBytes      int64     `json:"inBytes"`      // Size of the requests in bytes.
+	Start        time.Time        `json:"startTime"`    // The start time of the server.
+	RequestCount int64            `json:"requestCount"` // How many requests came in to the server.
+	InBytes      int64            `json:"inBytes"`      // Size of the requests in bytes.
+	PageRequests map[string]int64 `json:"pageRequests"` // How many requests came into each page.
 }
 
 // New is a factory function that returns a new server instance.
 func New(opts *Options) *Server {
-	log := logger.New(logger.Info, false)
+	log := logger.New(-1, false)
 
 	// Server information.
 	info := &Info{
@@ -62,7 +64,8 @@ func New(opts *Options) *Server {
 
 	// Stat information.
 	st := &Status{
-		Start: time.Now(),
+		Start:        time.Now(),
+		PageRequests: make(map[string]int64),
 	}
 
 	// Construct server.
@@ -79,6 +82,15 @@ func New(opts *Options) *Server {
 		s.log.SetLogLevel(logger.Debug)
 	}
 
+	// Setup the routes and middleware.
+	mux := http.NewServeMux()
+	mux.HandleFunc(httpRouteAliveV1, s.aliveHandler)
+	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
+	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
+	s.mw = &middlewarePreprocess{serv: s, handler: mux}
+
+	// Trap signals
+	s.handleSignals()
 	return s
 }
 
@@ -94,7 +106,6 @@ func (s *Server) Start() {
 	s.mu.Lock()
 	s.stats.Start = time.Now()
 	s.running = true
-	s.mu.Unlock()
 
 	// Spin off the worker processes.
 	for i := 0; i < s.info.MaxWorkers; i++ {
@@ -102,15 +113,10 @@ func (s *Server) Start() {
 		go parseWorker(s.jobq, &s.wg)
 	}
 
-	// Setup the routes and middleware, and serve.
-	mux := http.NewServeMux()
-	mux.HandleFunc(httpRouteAliveV1, s.aliveHandler)
-	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
-	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
-	mw := &middlewarePreprocess{serv: s, handler: mux}
-	err := http.ListenAndServe(fmt.Sprintf(":%d", s.info.Port), mw)
+	s.mu.Unlock()
+	err := http.ListenAndServe(fmt.Sprintf(":%d", s.info.Port), s.mw)
 	if err != nil {
-		s.log.Emergencyf(true, "%s\n", err)
+		s.log.Emergencyf("%s\n", err)
 	}
 }
 
@@ -120,12 +126,8 @@ func (s *Server) handleSignals() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
-			s.mu.Lock()
-			if s.info.Debug {
-				s.log.Debugf("Trapped signal: %v\n", sig)
-			}
-			s.mu.Unlock()
-			s.log.Infof("Server closing all jobs.")
+			s.log.Infof("Server received signal: %v\n", sig)
+			s.log.Infof("Stopping all workers...")
 			close(s.jobq)
 			s.wg.Wait()
 			s.log.Infof("Server exiting.")
@@ -143,7 +145,7 @@ func (s *Server) aliveHandler(w http.ResponseWriter, r *http.Request) {
 
 // parseHandler handles a parse request from the client and returns a json result.
 func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
-	if s.invalidMethod(w, r, httpGet) {
+	if s.invalidMethod(w, r, httpPost) {
 		return
 	}
 
@@ -163,7 +165,7 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, invalidJSONAttribute, http.StatusBadRequest)
 	}
 
-	// Send a parse request to a parse worker.
+	// Send a parse request to a parse worker and wait for it to complete.
 	job := parseJob{
 		Source: d,
 		DoneCh: make(chan bool),
@@ -193,6 +195,7 @@ func (s *Server) incrementStats(r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stats.RequestCount++
+	s.stats.PageRequests[r.URL.Path]++
 	b, err := ioutil.ReadAll(r.Body)
 	if err == nil {
 		s.stats.InBytes += int64(len(b))

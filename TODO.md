@@ -3,14 +3,14 @@
 
 - [ ] Global testing (not done)
 - [ ] More test rollout of source
-- [ ] Better Logging
+- [x] Better Logging
 - [ ] Log All Requests
-- [ ] Signal Interrupts
-- [ ] True connection throttling
+- [x] Signal Interrupts
+- [ ] True connection throttling with custom listener
 - [ ] Docker support
 - [ ] Socket Support
 - [ ] Captn-Proto
-- [x] Travis CI support
+- [x] Travis CI / Converalls support
 - [x] Better route, header error checking
 - [ ] oAuth support
 - [ ] Database integration BOLT, mySQL

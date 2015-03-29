@@ -53,11 +53,15 @@ var (
 	}
 )
 
+// Wrap the os.Exit() function so we can mock/test and
+type exiter func(code int)
+
 // Logger provides a datastructure for all logging state.
 type Logger struct {
 	logger *log.Logger
 	level  int
 	labels []string
+	exit   exiter
 }
 
 // New is a factory method to return a new logger instance.
@@ -70,6 +74,7 @@ func New(level int, colours bool) *Logger {
 	l := &Logger{
 		logger: log.New(os.Stdout, pre, flags),
 		level:  level,
+		exit:   func(code int) { os.Exit(code) },
 	}
 
 	if colours {
@@ -123,13 +128,11 @@ func (l *Logger) SetColouredLabels() {
 
 // Emergencyf prints an emergency message to the system log,
 // This is considered an unrecoverable error and the application also exits, unless dont exit = true.
-func (l *Logger) Emergencyf(exit bool, format string, v ...interface{}) {
+func (l *Logger) Emergencyf(format string, v ...interface{}) {
 	if l.level >= Emergency {
 		l.Output(3, labels[Emergency], format, v...)
 	}
-	if exit == true {
-		os.Exit(1)
-	}
+	l.performExit(l.exit)
 }
 
 // Alertf prints an alert message to the system log.
@@ -189,4 +192,9 @@ func (l *Logger) Output(calldepth int, label string, format string, v ...interfa
 		d = calldepth
 	}
 	return l.logger.Output(d, fmt.Sprintf(label+format, v...))
+}
+
+// performExit wraps the application exit point wih a custom closure/anonymous function
+func (l *Logger) performExit(exit exiter) {
+	exit(1) // call the exiter function
 }
