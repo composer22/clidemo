@@ -140,9 +140,10 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, invalidJSONText, http.StatusBadRequest)
 		return
 	}
-	d, e := data["text"].(string)
-	if e {
+	d, ok := data["text"].(string)
+	if !ok {
 		http.Error(w, invalidJSONAttribute, http.StatusBadRequest)
+		return
 	}
 
 	// Send a parse request to a parse worker and wait for it to complete.
@@ -152,8 +153,7 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	s.jobq <- &job
 	<-job.DoneCh
-
-	w.Write([]byte(job.ResultJSON))
+	w.Write([]byte(fmt.Sprintf(`{"result":%s}`, job.Result)))
 }
 
 // statusHandler handles a client request for server information and statistics.

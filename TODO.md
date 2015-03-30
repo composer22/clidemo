@@ -1,8 +1,6 @@
 
 # OnDeck
 
-- [x] Statistics - Detail and Refactoring
-- [ ] Parse handler debug
 - [ ] Log All Requests
 - [ ] pperf integration
 - [ ] True connection throttling with custom listener
@@ -14,7 +12,7 @@
 - [ ] More test rollout of source
 - [ ] Docker support
 - [ ] Socket Support
-- [ ] Database integration BOLT, mySQL
+- [ ] Database integration BOLT, mySQL + caching (for auth keys)
 - [ ] Alternate text parsing such as LuaJIT
 - [ ] Captn-Proto
 
@@ -24,4 +22,5 @@
 - [x] Signal Interrupts
 - [x] Travis CI / Converalls support
 - [x] Better route, header error checking
-
+- [x] Statistics - Detail and Refactoring
+- [x] Parse route debug
