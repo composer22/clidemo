@@ -9,7 +9,7 @@ const (
 
 	// * zeros = no change
 
-	// http: routes
+	// http: routes.
 
 	httpRouteAliveV1  = "/v1.0/alive"
 	httpRouteParseV1  = "/v1.0/parse"
@@ -23,7 +23,7 @@ const (
 	httpTrace  = "TRACE"
 	httpPatch  = "PATCH"
 
-	// error messages
+	// Error messages.
 
 	invalidMediaType     = "Invalid Content-Type or Accept header value."
 	invalidBody          = "Invalid body of text in request."

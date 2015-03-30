@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	log = logger.New(-1, false)
+	log = logger.New(logger.UseDefault, false)
 }
 
 // configureServerEnvironment configures the physical and logical server components for the application run.
@@ -28,7 +28,6 @@ func configureServerEnvironment(opts *server.Options) {
 	if opts.MaxProcs > 0 {
 		runtime.GOMAXPROCS(opts.MaxProcs)
 	}
-
 	log.Infof("NumCPU %d GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))
 }
 

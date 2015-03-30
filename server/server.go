@@ -16,40 +16,20 @@ import (
 
 // Server is the main structure that represents a server instance.
 type Server struct {
-	mu      sync.Mutex            // For locking access to server params.
-	info    *Info                 // Basic server information.
-	opts    *Options              // Original options and info for creating the server.
-	running bool                  // Is the server running?
-	log     *logger.Logger        // Log instance for recording error and other messages.
-	jobq    chan *parseJob        // Channel to send jobs.
-	mw      *middlewarePreprocess // Handler for all incomping routes
-	wg      sync.WaitGroup        // Synchronize close() of job channel.
-	stats   *Status               // Server statistics since it started.
-}
-
-// Info provides basic information about the running server.
-type Info struct {
-	Version    string `json:"version"`        // Version of the server.
-	Name       string `json:"name"`           // The name of the server.
-	UUID       string `json:"UUID"`           // Unique ID of the server.
-	Port       int    `json:"port"`           // Port the server is listening on.
-	MaxConn    int    `json:"maxConnections"` // The maximum concurrent connections accepted.
-	MaxWorkers int    `json:"maxWorkers"`     // The maximum numer of workers allowed to run.
-	Debug      bool   `json:"debugEnabled"`   // Is debugging enabled on the server.
-
-}
-
-// stats contains runtime statistics.
-type Status struct {
-	Start        time.Time        `json:"startTime"`    // The start time of the server.
-	RequestCount int64            `json:"requestCount"` // How many requests came in to the server.
-	InBytes      int64            `json:"inBytes"`      // Size of the requests in bytes.
-	PageRequests map[string]int64 `json:"pageRequests"` // How many requests came into each page.
+	mu      sync.Mutex     // For locking access to server params.
+	info    *Info          // Basic server information.
+	opts    *Options       // Original options and info for creating the server.
+	running bool           // Is the server running?
+	log     *logger.Logger // Log instance for recording error and other messages.
+	jobq    chan *parseJob // Channel to send jobs.
+	mw      *Middleware    // Handler for all incoming routes
+	wg      sync.WaitGroup // Synchronize close() of job channel.
+	stats   *Status        // Server statistics since it started.
 }
 
 // New is a factory function that returns a new server instance.
 func New(opts *Options) *Server {
-	log := logger.New(-1, false)
+	log := logger.New(logger.UseDefault, false)
 
 	// Server information.
 	info := &Info{
@@ -64,8 +44,8 @@ func New(opts *Options) *Server {
 
 	// Stat information.
 	st := &Status{
-		Start:        time.Now(),
-		PageRequests: make(map[string]int64),
+		Start:      time.Now(),
+		RouteStats: make(map[string]map[string]int64),
 	}
 
 	// Construct server.
@@ -87,7 +67,7 @@ func New(opts *Options) *Server {
 	mux.HandleFunc(httpRouteAliveV1, s.aliveHandler)
 	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
 	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
-	s.mw = &middlewarePreprocess{serv: s, handler: mux}
+	s.mw = &Middleware{serv: s, handler: mux}
 
 	// Trap signals
 	s.handleSignals()
@@ -184,22 +164,25 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	inf, _ := json.Marshal(s.info)
-	op, _ := json.Marshal(s.opts)
-	st, _ := json.Marshal(s.stats)
-	w.Write([]byte(fmt.Sprintf(`{"info":%s,"options":%s,"stats":%s}`, inf, op, st)))
+	b, _ := json.Marshal(
+		&struct {
+			Info    *Info    `json:"info"`
+			Options *Options `json:"options"`
+			Stats   *Status  `json:"stats"`
+		}{
+			Info:    s.info,
+			Options: s.opts,
+			Stats:   s.stats,
+		})
+	w.Write(b)
 }
 
 // incrementStats increments the statistics for the request being handled by the server.
 func (s *Server) incrementStats(r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.stats.RequestCount++
-	s.stats.PageRequests[r.URL.Path]++
-	b, err := ioutil.ReadAll(r.Body)
-	if err == nil {
-		s.stats.InBytes += int64(len(b))
-	}
+	s.stats.IncrRequestStats(r.ContentLength)
+	s.stats.IncrRouteStats(r.URL.Path, r.ContentLength)
 }
 
 // initResponseHeader sets up the common http response headers for the return of all json calls.

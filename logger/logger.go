@@ -1,6 +1,6 @@
 // Package logger provides a custom logging abstract over the standard out logging of golang.
 // All logging should by go to stdout according to 12-factor principles.
-// Logging levels are based on RFC 5424 - http://www.rfc-base.org/rfc-5424.html#
+// Logging levels are based on RFC 5424: http://www.rfc-base.org/rfc-5424.html#
 package logger
 
 import (
@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-// Standard labels
+// Standard labels.
 const (
 
 	//  RFC 5424 log levels.
@@ -22,9 +22,12 @@ const (
 	Notice
 	Info
 	Debug
+
+	UseDefault = -1 // Note: literal consts must follow any iota decls else unexpected results.
 )
 
 const (
+
 	// ANSI 8 colours.
 	foregroundBlack = iota + 30
 	foregroundRed
@@ -41,6 +44,7 @@ const (
 )
 
 var (
+
 	// Log labels.
 	labels = []string{"[EMERGENCY] ",
 		"[ALERT] ",
@@ -53,7 +57,7 @@ var (
 	}
 )
 
-// Wrap the os.Exit() function so we can mock/test and
+// Wrap the os.Exit() function so we can mock/test or customize exit.
 type exiter func(code int)
 
 // Logger provides a datastructure for all logging state.
@@ -68,7 +72,7 @@ type Logger struct {
 func New(level int, colours bool) *Logger {
 	flags := log.Lshortfile | log.Ldate | log.Lmicroseconds
 	pre := fmt.Sprintf("[%d] ", os.Getpid())
-	if level < 0 {
+	if level == UseDefault {
 		level = Info
 	}
 
@@ -86,17 +90,20 @@ func New(level int, colours bool) *Logger {
 	return l
 }
 
-// SetLogLevel allows a user to set the log level of the logger
+// SetLogLevel allows a user to set the log level of the logger.
 func (l *Logger) SetLogLevel(logLevel int) error {
-
-	if logLevel < Emergency || logLevel > Debug {
+	if logLevel < UseDefault || logLevel > Debug {
 		return errors.New(fmt.Sprintf("%d log level arg is not in valid range.", logLevel))
+	}
+
+	if logLevel == UseDefault {
+		logLevel = Info
 	}
 	l.level = logLevel
 	return nil
 }
 
-// SetExitFunc allows a user to set the exit function of the
+// SetExitFunc allows a user to set the exit function of the logger.
 func (l *Logger) SetExitFunc(exitF exiter) error {
 	if exitF == nil {
 		return errors.New("Exit function is manadatory.")
@@ -105,7 +112,7 @@ func (l *Logger) SetExitFunc(exitF exiter) error {
 	return nil
 }
 
-// GetLogLevel returns the current log level of the logger
+// GetLogLevel returns the current log level of the logger.
 func (l *Logger) GetLogLevel() int {
 	return l.level
 }
@@ -204,7 +211,7 @@ func (l *Logger) Output(calldepth int, label string, format string, v ...interfa
 	return l.logger.Output(d, fmt.Sprintf(label+format, v...))
 }
 
-// performExit wraps the application exit point wih a custom closure/anonymous function
+// performExit wraps the application exit point wih a custom closure/anonymous function.
 func (l *Logger) performExit(exit exiter) {
 	exit(1) // call the exiter function
 }

@@ -14,7 +14,24 @@ func TestSetAndGetLogLevel(t *testing.T) {
 	if l.GetLogLevel() != Debug {
 		t.Fatalf("Invalid Log Level Set.\n")
 	}
-	err := l.SetLogLevel(Emergency - 1)
+	err := l.SetLogLevel(Info)
+	if err != nil {
+		t.Fatalf("Set log level func should have been called correctly for value.\n")
+	}
+	if l.level != Info {
+		t.Fatalf("Set log level func should have set new value correctly.\n")
+	}
+
+	err = l.SetLogLevel(UseDefault)
+	if err != nil {
+		t.Fatalf("Set log level func should have been called correctly for value.\n")
+	}
+
+	if l.level != Info {
+		t.Fatalf("Set default log level should have set new value correctly.\n")
+	}
+
+	err = l.SetLogLevel(UseDefault - 1)
 	if err == nil {
 		t.Fatalf("Low param value was not tested properly.\n")
 	}
@@ -25,7 +42,7 @@ func TestSetAndGetLogLevel(t *testing.T) {
 }
 
 func TestDefaultSetLogLevel(t *testing.T) {
-	l := New(-1, false)
+	l := New(UseDefault, false)
 	if l.GetLogLevel() != Info {
 		t.Fatalf("Invalid default Log Level Set.\n")
 	}
@@ -43,7 +60,7 @@ func TestSetErrorFunc(t *testing.T) {
 }
 
 func TestSetColourLabels(t *testing.T) {
-	l := New(-1, true)
+	l := New(UseDefault, true)
 	for i, actual := range l.labels {
 		var colour int
 		switch i {
@@ -136,7 +153,7 @@ func TestOutputf(t *testing.T) {
 	expectOutput(t, func() {
 		l := New(Debug, false)
 		l.Output(-1, test_label, test_message)
-	}, fmt.Sprintf("%s%s\n", "[OUTPUT] ", test_message))
+	}, fmt.Sprintf("%s%s\n", test_label, test_message))
 }
 
 // expectOutput is a helper function that repipes or mocks out stdout and allows error messages to be tested
