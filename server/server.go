@@ -13,6 +13,9 @@ import (
 	"sync"
 	"time"
 
+	// Allow dynamic profiling.
+	_ "net/http/pprof"
+
 	"github.com/composer22/clidemo/logger"
 )
 
@@ -50,8 +53,10 @@ func New(opts *Options) *Server {
 	info := &Info{
 		Version:    version,
 		Name:       opts.Name,
+		Hostname:   opts.Hostname,
 		UUID:       createV4UUID(),
 		Port:       opts.Port,
+		ProfPort:   opts.ProfPort,
 		MaxConn:    opts.MaxConn,
 		MaxWorkers: opts.MaxWorkers,
 		Debug:      opts.Debug,
@@ -108,11 +113,29 @@ func (s *Server) Start() {
 		go parseWorker(s.jobq, &s.wg)
 	}
 
+	// Pprof http endpoint for the profiler.
+	if s.info.ProfPort > 0 {
+		s.StartProfiler()
+	}
+
 	s.mu.Unlock()
-	err := http.ListenAndServe(fmt.Sprintf(":%d", s.info.Port), s.mw)
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", s.info.Hostname, s.info.Port), s.mw)
 	if err != nil {
 		s.log.Emergencyf("%s\n", err)
 	}
+}
+
+// StartProfiler is called to enable dynamic profiling.
+func (s *Server) StartProfiler() {
+	s.log.Infof("Starting profiling on http port %d", s.opts.ProfPort)
+
+	hp := fmt.Sprintf("%s:%d", s.info.Hostname, s.info.ProfPort)
+	go func() {
+		err := http.ListenAndServe(hp, nil)
+		if err != nil {
+			s.log.Emergencyf("Error starting profile monitoring service: %s", err)
+		}
+	}()
 }
 
 // handleSignals responds to operating system interrupts such as application kills.
@@ -254,7 +277,7 @@ func (s *Server) LogRequest(r *http.Request) {
 		RequestURI:    r.RequestURI,
 		Trailer:       r.Trailer,
 	})
-	s.log.Infof(string(b))
+	s.log.Infof(`{"request":%s}`, string(b))
 }
 
 // isRunning returns a boolean representing whether the server is running or not.

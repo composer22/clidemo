@@ -1,15 +1,13 @@
 
 # OnDeck
 
-- [*] Log All Requests
-- [ ] pperf integration
 - [ ] True connection throttling with custom listener
 - [ ] oAuth support
+- [ ] Cleanup
+- [ ] Complete Unit tests
 
 # Backlog
 
-- [ ] Global testing (not done)
-- [ ] More test rollout of source
 - [ ] Docker support
 - [ ] Socket Support
 - [ ] Database integration BOLT, mySQL + caching (for auth keys)
@@ -18,6 +16,8 @@
 
 # Done
 
+- [x] Log All Requests
+- [x] pperf integration
 - [x] Better Logging
 - [x] Signal Interrupts
 - [x] Travis CI / Converalls support

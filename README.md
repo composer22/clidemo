@@ -16,7 +16,10 @@ Usage: clidemo [options...] [input_filename]
 
 Server options:
     -N, --name NAME                  NAME of the server
+    -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost)
     -p, --port PORT                  PORT to listen on (default: 49152)
+	-L, --profiler_port PORT         PORT the profiler is listening on
+	                                 (default: (default: <= 0 is off)
     -n, --connections MAX            MAX server connections allowed (default: 1000)
     -W, --workers MAX                MAX running workers allowed (default: 1000)
     -X, --procs MAX                  MAX processor cores to use from the machine
@@ -86,6 +89,7 @@ Example cURL:
 ```
 
 $  curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET "http://localhost:8080/v1.0/alive"
+
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=utf-8
 Date: Fri, 27 Mar 2015 20:26:23 +0000
@@ -99,8 +103,8 @@ URL Endpoints:
 
 http://localhost:49152/v1.0/alive - GET Is the server alive?
 
-http://localhost:49152/v1.0/parse - GET Submit a parse request to the server.
-                                      Body should contain {"text":"<your text to parse>"}
+http://localhost:49152/v1.0/parse - POST Submit a parse request to the server.
+                                    Body should contain {"text":"<your text to parse>"}
 
 http://localhost:49152/v1.0/status - GET Returns information about the server.
 
