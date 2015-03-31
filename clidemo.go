@@ -40,7 +40,7 @@ func main() {
 
 	flag.StringVar(&opts.Name, "N", "", "Name of the server")
 	flag.StringVar(&opts.Name, "--name", "", "Name of the server")
-	flag.IntVar(&opts.Port, "P", server.DefaultPort, "Port to listen on (default: 49152)")
+	flag.IntVar(&opts.Port, "p", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.Port, "--port", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections, "Maximum server connections allowed (default: 1000)")
 	flag.IntVar(&opts.MaxConn, "--connections", server.DefaultMaxConnections,
