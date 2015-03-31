@@ -33,15 +33,18 @@ func configureServerEnvironment(opts *server.Options) {
 
 // main is the main entry point for the application or server launch.
 func main() {
-
 	opts := server.Options{}
 	var showVersion bool
 	var fileIn string
 
-	flag.StringVar(&opts.Name, "N", "", "Name of the server")
-	flag.StringVar(&opts.Name, "--name", "", "Name of the server")
+	flag.StringVar(&opts.Name, "N", "", "Name of the server (optional)")
+	flag.StringVar(&opts.Name, "--name", "", "Name of the server (optional)")
+	flag.StringVar(&opts.Hostname, "h", server.DefaultHostname, "Hostname of the server")
+	flag.StringVar(&opts.Hostname, "--hostname", server.DefaultHostname, "Name of the server")
 	flag.IntVar(&opts.Port, "p", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.Port, "--port", server.DefaultPort, "Port to listen on (default: 49152)")
+	flag.IntVar(&opts.ProfPort, "L", server.DefaultProfPort, "Profiler Port to listen on (default: <= 0 is off)")
+	flag.IntVar(&opts.ProfPort, "--profiler_port", server.DefaultProfPort, "Profiler Port to listen on (default: <= 0 is off)")
 	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections, "Maximum server connections allowed (default: 1000)")
 	flag.IntVar(&opts.MaxConn, "--connections", server.DefaultMaxConnections,
 		"Maximum server connections allowed (default: 1000)")
@@ -85,15 +88,11 @@ func main() {
 
 	// Lets do work as a service or on direct input.
 	switch {
-
-	// Piped input text (higher priority than command line file names or server mode).
-	case fi.Mode()&os.ModeNamedPipe != 0:
+	case fi.Mode()&os.ModeNamedPipe != 0: // Piped input text (higher priority than file names or server mode).
 		p := parser.New()
 		p.Execute(bufio.NewReader(os.Stdin))
 		fmt.Print(p)
-
-	// File input text higher priority than server mode.
-	case fileIn != "":
+	case fileIn != "": // File input text higher priority than server mode.
 		fi, err := os.Open(fileIn)
 		if err != nil {
 			log.Emergencyf("Cannot open file ", fileIn, ": ", err)
@@ -102,9 +101,7 @@ func main() {
 		p := parser.New()
 		p.Execute(bufio.NewReader(fi))
 		fmt.Print(p)
-
-	// Server mode.
-	default:
+	default: // Server mode.
 		configureServerEnvironment(&opts)
 		s := server.New(&opts)
 		s.Start()

@@ -6,7 +6,9 @@ import "encoding/json"
 // and the server (if server mode is indicated).
 type Options struct {
 	Name       string `json:"name"`           // The name of the server.
+	Hostname   string `json:"hostname"`       // The hostname of the server.
 	Port       int    `json:"port"`           // The default port of the server.
+	ProfPort   int    `json:"profPort"`       // The profiler port of the server.
 	MaxConn    int    `json:"maxConnections"` // The maximum concurrent connections accepted.
 	MaxWorkers int    `json:"maxWorkers"`     // The maximum numer of workers allowed to run.
 	MaxProcs   int    `json:"maxProcs"`       // The maximum number of processor cores available.
