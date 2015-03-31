@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	testParserText = "Now is the 'Winter' of our discontent. And then the other dude as well."
-
+	testParserText       = "Now is the 'Winter' of our discontent. And then the other dude as well."
 	testParserResultJSON = `{"words":{"and":{"counter":1,"sentenceUse":[1]},"as":` +
 		`{"counter":1,"sentenceUse":[1]},"discontent":{"counter":1,"sentenceUse":[0]},"dude":` +
 		`{"counter":1,"sentenceUse":[1]},"is":{"counter":1,"sentenceUse":[0]},"now":` +
