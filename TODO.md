@@ -1,7 +1,7 @@
 
 # OnDeck
 
-- [ ] Log All Requests
+- [*] Log All Requests
 - [ ] pperf integration
 - [ ] True connection throttling with custom listener
 - [ ] oAuth support

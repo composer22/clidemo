@@ -10,6 +10,7 @@ type Middleware struct {
 
 // ServeHTTP implements the interface to accept requests so they can be filtered before handling by the server.
 func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	m.serv.LogRequest(r)
 	m.serv.incrementStats(r)
 	m.serv.initResponseHeader(w)
 	if m.serv.invalidHeader(w, r) {

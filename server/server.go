@@ -2,10 +2,12 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"sync"
@@ -13,6 +15,19 @@ import (
 
 	"github.com/composer22/clidemo/logger"
 )
+
+type requestLogEntry struct {
+	Method        string      `json:"method"`
+	URL           *url.URL    `json:"url"`
+	Proto         string      `json:"proto"`
+	Header        http.Header `json:"header"`
+	Body          string      `json:"body"`
+	ContentLength int64       `json:"contentLength"`
+	Host          string      `json:"host"`
+	RemoteAddr    string      `json:"remoteAddr"`
+	RequestURI    string      `json:"requestURI"`
+	Trailer       http.Header `json:"trailer"`
+}
 
 // Server is the main structure that represents a server instance.
 type Server struct {
@@ -212,6 +227,34 @@ func (s *Server) invalidMethod(w http.ResponseWriter, r *http.Request, method st
 		return true
 	}
 	return false
+}
+
+// LogRequest logs the http request information into the logger.
+func (s *Server) LogRequest(r *http.Request) {
+	var cl int64
+	if r.ContentLength > 0 {
+		cl = r.ContentLength
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		body = []byte("Could not parse body")
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body)) // We need to set the body back after we read it.
+
+	b, _ := json.Marshal(&requestLogEntry{
+		Method:        r.Method,
+		URL:           r.URL,
+		Proto:         r.Proto,
+		Header:        r.Header,
+		Body:          string(body),
+		ContentLength: cl,
+		Host:          r.Host,
+		RemoteAddr:    r.RemoteAddr,
+		RequestURI:    r.RequestURI,
+		Trailer:       r.Trailer,
+	})
+	s.log.Infof(string(b))
 }
 
 // isRunning returns a boolean representing whether the server is running or not.
