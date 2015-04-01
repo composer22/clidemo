@@ -3,24 +3,24 @@
 
 - [ ] True connection throttling with custom listener
 - [ ] oAuth support
-- [ ] Cleanup
-- [ ] Complete Unit tests
+- [ ] Cleanup and refactoring
+- [ ] Complete unit tests
 
 # Backlog
 
 - [ ] Docker support
-- [ ] Socket Support
+- [ ] Socket support
 - [ ] Database integration BOLT, mySQL + caching (for auth keys)
 - [ ] Alternate text parsing such as LuaJIT
 - [ ] Captn-Proto
 
 # Done
 
-- [x] Log All Requests
+- [x] Log all requests
 - [x] pperf integration
-- [x] Better Logging
-- [x] Signal Interrupts
+- [x] Better logging
+- [x] Signal interrupts
 - [x] Travis CI / Converalls support
 - [x] Better route, header error checking
-- [x] Statistics - Detail and Refactoring
+- [x] Statistics - detail and refactoring
 - [x] Parse route debug
