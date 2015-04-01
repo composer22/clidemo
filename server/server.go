@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync"
 	"time"
 
@@ -202,15 +203,19 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	mStats := &runtime.MemStats{}
+	runtime.ReadMemStats(mStats)
 	b, _ := json.Marshal(
 		&struct {
-			Info    *Info    `json:"info"`
-			Options *Options `json:"options"`
-			Stats   *Status  `json:"stats"`
+			Info    *Info             `json:"info"`
+			Options *Options          `json:"options"`
+			Stats   *Status           `json:"stats"`
+			Memory  *runtime.MemStats `json:"memStats"`
 		}{
 			Info:    s.info,
 			Options: s.opts,
 			Stats:   s.stats,
+			Memory:  mStats,
 		})
 	w.Write(b)
 }
