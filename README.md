@@ -15,17 +15,17 @@ evoked as either a command line utility or as a stand alone server process.
 Usage: clidemo [options...] [input_filename]
 
 Server options:
-    -N, --name NAME                  NAME of the server
-    -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost)
-    -p, --port PORT                  PORT to listen on (default: 49152)
-	-L, --profiler_port PORT         PORT the profiler is listening on
-	                                 (default: (default: <= 0 is off)
-    -n, --connections MAX            MAX server connections allowed (default: 1000)
-    -W, --workers MAX                MAX running workers allowed (default: 1000)
-    -X, --procs MAX                  MAX processor cores to use from the machine
-									   Anything <= 0 is no change to the environment.
-									   (default: 0)
+    -N, --name NAME                  NAME of the server (default: "").
+    -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
+    -p, --port PORT                  PORT to listen on (default: 49152).
+	-L, --profiler_port PORT         *PORT the profiler is listening on.
+    -n, --connections MAX            MAX server connections allowed (default: 1000).
+    -W, --workers MAX                MAX running workers allowed (default: 1000).
+    -X, --procs MAX                  *MAX processor cores to use from the machine.
+
     -d, --debug                      Enable debugging output (default: false)
+
+     *  Anything <= 0 is no change to the environment (default: 0).
 
 File input options:
     -f, --file FILE                  Process input FILE
@@ -36,7 +36,7 @@ Common options:
 
 Examples:
 
-    # Server mode activated as "Washington" on port 8080; 10 conns; 30 workers; 2 processors
+    # Server mode activated as "San Francisco" on localhost port 8080; 10 conns; 30 workers; 2 processors
     clidemo -N "San Francisco" -p 8080 -n 10 -W 30 -X 2
 
 	# File input using -f flag with debug option
@@ -104,9 +104,9 @@ URL Endpoints:
 http://localhost:49152/v1.0/alive - GET Is the server alive?
 
 http://localhost:49152/v1.0/parse - POST Submit a parse request to the server.
-                                    Body should contain {"text":"<your text to parse>"}
+                                    Body should contain {"text":"Your text to parse. More text."}
 
-http://localhost:49152/v1.0/status - GET Returns information about the server.
+http://localhost:49152/v1.0/status - GET Returns information about the server state.
 
 ## License
 

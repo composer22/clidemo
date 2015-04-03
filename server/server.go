@@ -35,15 +35,16 @@ type requestLogEntry struct {
 
 // Server is the main structure that represents a server instance.
 type Server struct {
-	mu      sync.Mutex     // For locking access to server params.
-	info    *Info          // Basic server information.
-	opts    *Options       // Original options and info for creating the server.
-	running bool           // Is the server running?
-	log     *logger.Logger // Log instance for recording error and other messages.
-	jobq    chan *parseJob // Channel to send jobs.
-	mw      *Middleware    // Handler for all incoming routes
-	wg      sync.WaitGroup // Synchronize close() of job channel.
-	stats   *Status        // Server statistics since it started.
+	mu       sync.Mutex         // For locking access to server params.
+	info     *Info              // Basic server information.
+	opts     *Options           // Original options and info for creating the server.
+	running  bool               // Is the server running?
+	log      *logger.Logger     // Log instance for recording error and other messages.
+	jobq     chan *parseJob     // Channel to send jobs.
+	srvr     *http.Server       // HTTP server
+	listener *ThrottledListener // The listener for connections
+	wg       sync.WaitGroup     // Synchronize close() of job channel.
+	stats    *Status            // Server statistics since it started.
 }
 
 // New is a factory function that returns a new server instance.
@@ -83,12 +84,15 @@ func New(opts *Options) *Server {
 		s.log.SetLogLevel(logger.Debug)
 	}
 
-	// Setup the routes and middleware.
+	// Setup the routes, middleware, and server.
 	mux := http.NewServeMux()
 	mux.HandleFunc(httpRouteAliveV1, s.aliveHandler)
 	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
 	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
-	s.mw = &Middleware{serv: s, handler: mux}
+	s.srvr = &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", s.info.Hostname, s.info.Port),
+		Handler: &Middleware{serv: s, handler: mux},
+	}
 
 	// Trap signals
 	s.handleSignals()
@@ -119,11 +123,13 @@ func (s *Server) Start() {
 		s.StartProfiler()
 	}
 
-	s.mu.Unlock()
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", s.info.Hostname, s.info.Port), s.mw)
+	ln, err := ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
 	if err != nil {
 		s.log.Emergencyf("%s\n", err)
 	}
+	s.listener = ln
+	s.mu.Unlock()
+	s.srvr.Serve(s.listener)
 }
 
 // StartProfiler is called to enable dynamic profiling.
@@ -203,6 +209,7 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.stats.CurrentConns = s.listener.GetConnectedCount() // Get latest live connection count.
 	mStats := &runtime.MemStats{}
 	runtime.ReadMemStats(mStats)
 	b, _ := json.Marshal(

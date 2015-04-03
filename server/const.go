@@ -1,5 +1,7 @@
 package server
 
+import "time"
+
 const (
 	version               = "0.1.0"     // Application and server version.
 	DefaultHostname       = "localhost" // The hostname of the server.
@@ -11,8 +13,10 @@ const (
 
 	// * zeros = no change
 
-	// http: routes.
+	// Listener and connections.
+	TCPConnectionTimeout = 3 * time.Minute
 
+	// http: routes.
 	httpRouteAliveV1  = "/v1.0/alive"
 	httpRouteParseV1  = "/v1.0/parse"
 	httpRouteStatusV1 = "/v1.0/status"
@@ -26,7 +30,6 @@ const (
 	httpPatch  = "PATCH"
 
 	// Error messages.
-
 	invalidMediaType     = "Invalid Content-Type or Accept header value."
 	invalidBody          = "Invalid body of text in request."
 	invalidJSONText      = "Invalid JSON format in text of body in request."
