@@ -10,6 +10,7 @@ type Status struct {
 	Start        time.Time                   `json:"startTime"`    // The start time of the server.
 	RequestCount int64                       `json:"requestCount"` // How many requests came in to the server.
 	RequestBytes int64                       `json:"requestBytes"` // Size of the requests in bytes.
+	CurrentConns int                         `json:"currentConns"` // Current number of live connections.
 	RouteStats   map[string]map[string]int64 `json:"routeStats"`   // How many requests/bytes came into each route.
 }
 

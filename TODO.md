@@ -1,7 +1,6 @@
 
 # OnDeck
 
-- [ ] True connection throttling with custom listener
 - [ ] oAuth support
 - [ ] Cleanup and refactoring
 - [ ] Complete unit tests
@@ -16,6 +15,7 @@
 
 # Done
 
+- [x] True connection throttling with custom listener
 - [x] Log all requests
 - [x] pperf integration
 - [x] Better logging
