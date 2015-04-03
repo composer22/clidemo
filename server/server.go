@@ -11,12 +11,14 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
 	// Allow dynamic profiling.
 	_ "net/http/pprof"
 
+	"github.com/composer22/clidemo/auth"
 	"github.com/composer22/clidemo/logger"
 )
 
@@ -39,6 +41,7 @@ type Server struct {
 	info     *Info              // Basic server information.
 	opts     *Options           // Original options and info for creating the server.
 	running  bool               // Is the server running?
+	auth     *auth.Auth         // Authorization lookup
 	log      *logger.Logger     // Log instance for recording error and other messages.
 	jobq     chan *parseJob     // Channel to send jobs.
 	srvr     *http.Server       // HTTP server.
@@ -75,6 +78,7 @@ func New(opts *Options) *Server {
 	s := &Server{
 		info:    info,
 		opts:    opts,
+		auth:    auth.New(),
 		jobq:    make(chan *parseJob),
 		log:     log,
 		stats:   st,
@@ -264,6 +268,15 @@ func (s *Server) initResponseHeader(w http.ResponseWriter) {
 func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request) bool {
 	if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("Accept") != "application/json" {
 		http.Error(w, invalidMediaType, http.StatusUnsupportedMediaType)
+		return true
+	}
+	return false
+}
+
+// invalidAuth validates that the Authorization token is valid for using the API
+func (s *Server) invalidAuth(w http.ResponseWriter, r *http.Request) bool {
+	if !s.auth.Valid(strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", -1)) {
+		http.Error(w, invalidAuthorization, http.StatusUnauthorized)
 		return true
 	}
 	return false

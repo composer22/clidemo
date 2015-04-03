@@ -1,7 +1,6 @@
 
 # OnDeck
 
-- [ ] oAuth support
 - [ ] Cleanup and refactoring
 - [ ] Complete unit tests
 
@@ -15,6 +14,7 @@
 
 # Done
 
+- [x] Bearertoken a uthentication stub
 - [x] True connection throttling with custom listener
 - [x] Log all requests
 - [x] pperf integration
