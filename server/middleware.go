@@ -16,5 +16,8 @@ func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if m.serv.invalidHeader(w, r) {
 		return
 	}
+	if m.serv.invalidAuth(w, r) {
+		return
+	}
 	m.handler.ServeHTTP(w, r)
 }

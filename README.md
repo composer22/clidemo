@@ -6,6 +6,26 @@
 
 A text parser for counting words and sentence locations written in [Go.](http://golang.org)
 
+## About
+
+This is a small demonstration app of some Golang functions and features. Initially intended
+to act as a bed for testing Golang development, it could form the framework for a larger application.
+
+Some demonstration objectives:
+
+* CLI flag parameter passing.
+* CLI submission of data by file or by pipe.
+* Concurrent worker jobqueue (here with a simple text parser/scanner).
+* Webserver API:
+    + Custom connection listener for throttling connections.
+    + Middleware for globally validating incoming requests.
+    + Status information from the system.
+    + Integration of pprof for performance profiling.
+    + JSON encoding of the response body.
+    + Standard RESTful request and response header usage.
+
+For TODOs, please see TODO.md
+
 ## Usage
 
 ```
@@ -15,11 +35,11 @@ evoked as either a command line utility or as a stand alone server process.
 Usage: clidemo [options...] [input_filename]
 
 Server options:
-    -N, --name NAME                  NAME of the server (default: "").
+    -N, --name NAME                  NAME of the server (default: empty field).
     -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
     -p, --port PORT                  PORT to listen on (default: 49152).
-	-L, --profiler_port PORT         *PORT the profiler is listening on.
-    -n, --connections MAX            MAX server connections allowed (default: 1000).
+	-L, --profiler_port PORT         *PORT the profiler is listening on (default: off).
+    -n, --connections MAX            *MAX server connections allowed (default: unlimited).
     -W, --workers MAX                MAX running workers allowed (default: 1000).
     -X, --procs MAX                  *MAX processor cores to use from the machine.
 
@@ -36,7 +56,8 @@ Common options:
 
 Examples:
 
-    # Server mode activated as "San Francisco" on localhost port 8080; 10 conns; 30 workers; 2 processors
+    # Server mode activated as "San Francisco" on localhost port 8080;
+	# 10 conns; 30 workers; 2 processors
     clidemo -N "San Francisco" -p 8080 -n 10 -W 30 -X 2
 
 	# File input using -f flag with debug option
@@ -80,22 +101,26 @@ Run `go help` for more guidance, and visit <http://golang.org/> for tutorials, p
 
 Header should contain:
 
-Content-Type: application/json
-
-Accept: application/json
+* Accept: application/json
+* Authorization: Bearer with token
+* Content-Type: application/json
 
 Example cURL:
 
 ```
 
-$  curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET "http://localhost:8080/v1.0/alive"
+$ curl -i -H "Accept: application/json" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer 3A3E6C4C51F12DF2415682CCF9D18" \
+-X GET "http://0.0.0.0:8080/v1.0/alive"
 
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=utf-8
-Date: Fri, 27 Mar 2015 20:26:23 +0000
+Date: Fri, 03 Apr 2015 17:29:17 +0000
 Server: San Francisco
-X-Request-Id: 6907BAC6-24C4-4B66-983F-230DDC18D22F
+X-Request-Id: DC8D9C2E-8161-4FC0-937F-4CA7037970D5
 Content-Length: 0
+
 
 ```
 

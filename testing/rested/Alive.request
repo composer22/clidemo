@@ -20,6 +20,14 @@
 		</dict>
 		<dict>
 			<key>header</key>
+			<string>Authorization</string>
+			<key>inUse</key>
+			<true/>
+			<key>value</key>
+			<string>Bearer 3A3E6C4C51F12DF2415682CCF9D18</string>
+		</dict>
+		<dict>
+			<key>header</key>
 			<string>Content-Type</string>
 			<key>inUse</key>
 			<true/>
