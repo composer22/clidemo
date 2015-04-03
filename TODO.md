@@ -14,7 +14,7 @@
 
 # Done
 
-- [x] Bearertoken a uthentication stub
+- [x] Bearer token authentication stub
 - [x] True connection throttling with custom listener
 - [x] Log all requests
 - [x] pperf integration

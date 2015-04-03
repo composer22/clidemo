@@ -17,12 +17,12 @@ Some demonstration objectives:
 * CLI submission of data by file or by pipe.
 * Concurrent worker jobqueue (here with a simple text parser/scanner).
 * Webserver API:
-** Custom connection listener for throttling connections.
-** Middleware for globally validating incoming requests.
-** Status information from the system.
-** Integration of pprof for performance profiling.
-** JSON encoding of the response body.
-** Standard RESTful request and response header usage.
+    + Custom connection listener for throttling connections.
+    + Middleware for globally validating incoming requests.
+    + Status information from the system.
+    + Integration of pprof for performance profiling.
+    + JSON encoding of the response body.
+    + Standard RESTful request and response header usage.
 
 For TODOs, please see TODO.md
 
