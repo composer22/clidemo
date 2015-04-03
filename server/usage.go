@@ -13,11 +13,11 @@ Description: Parse text counting words and sentence locations, this command
 Usage: clidemo [options...] [input_filename]
 
 Server options:
-    -N, --name NAME                  NAME of the server (default: "").
+    -N, --name NAME                  NAME of the server (default: empty field).
     -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
     -p, --port PORT                  PORT to listen on (default: 49152).
-	-L, --profiler_port PORT         *PORT the profiler is listening on.
-    -n, --connections MAX            MAX server connections allowed (default: 1000).
+	-L, --profiler_port PORT         *PORT the profiler is listening on (default: off).
+    -n, --connections MAX            *MAX server connections allowed (default: unlimited).
     -W, --workers MAX                MAX running workers allowed (default: 1000).
     -X, --procs MAX                  *MAX processor cores to use from the machine.
 

@@ -15,11 +15,11 @@ evoked as either a command line utility or as a stand alone server process.
 Usage: clidemo [options...] [input_filename]
 
 Server options:
-    -N, --name NAME                  NAME of the server (default: "").
+    -N, --name NAME                  NAME of the server (default: empty field).
     -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
     -p, --port PORT                  PORT to listen on (default: 49152).
-	-L, --profiler_port PORT         *PORT the profiler is listening on.
-    -n, --connections MAX            MAX server connections allowed (default: 1000).
+	-L, --profiler_port PORT         *PORT the profiler is listening on (default: off).
+    -n, --connections MAX            *MAX server connections allowed (default: unlimited).
     -W, --workers MAX                MAX running workers allowed (default: 1000).
     -X, --procs MAX                  *MAX processor cores to use from the machine.
 
@@ -36,7 +36,8 @@ Common options:
 
 Examples:
 
-    # Server mode activated as "San Francisco" on localhost port 8080; 10 conns; 30 workers; 2 processors
+    # Server mode activated as "San Francisco" on localhost port 8080;
+	# 10 conns; 30 workers; 2 processors
     clidemo -N "San Francisco" -p 8080 -n 10 -W 30 -X 2
 
 	# File input using -f flag with debug option
@@ -88,7 +89,8 @@ Example cURL:
 
 ```
 
-$  curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET "http://localhost:8080/v1.0/alive"
+$  curl -i -H "Accept: application/json" -H "Content-Type: application/json" \
+ -X GET "http://localhost:8080/v1.0/alive"
 
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=utf-8

@@ -41,8 +41,8 @@ type Server struct {
 	running  bool               // Is the server running?
 	log      *logger.Logger     // Log instance for recording error and other messages.
 	jobq     chan *parseJob     // Channel to send jobs.
-	srvr     *http.Server       // HTTP server
-	listener *ThrottledListener // The listener for connections
+	srvr     *http.Server       // HTTP server.
+	listener *ThrottledListener // Optional listener for connections.
 	wg       sync.WaitGroup     // Synchronize close() of job channel.
 	stats    *Status            // Server statistics since it started.
 }
@@ -66,8 +66,9 @@ func New(opts *Options) *Server {
 
 	// Stat information.
 	st := &Status{
-		Start:      time.Now(),
-		RouteStats: make(map[string]map[string]int64),
+		Start:        time.Now(),
+		CurrentConns: -1,
+		RouteStats:   make(map[string]map[string]int64),
 	}
 
 	// Construct server.
@@ -107,10 +108,19 @@ func PrintVersionAndExit() {
 
 // Start spins up the server to accept incoming connections.
 func (s *Server) Start() {
+	var err error
+
 	s.log.Infof("Starting clidemo version %s\n", version)
 	s.mu.Lock()
-	s.stats.Start = time.Now()
-	s.running = true
+
+	// Throttled? Then create a listener.
+	if s.opts.MaxConn > 0 {
+		s.listener, err = ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
+		if err != nil {
+			s.mu.Unlock()
+			s.log.Emergencyf("%s\n", err)
+		}
+	}
 
 	// Spin off the worker processes.
 	for i := 0; i < s.info.MaxWorkers; i++ {
@@ -123,19 +133,21 @@ func (s *Server) Start() {
 		s.StartProfiler()
 	}
 
-	ln, err := ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
-	if err != nil {
-		s.log.Emergencyf("%s\n", err)
-	}
-	s.listener = ln
+	s.stats.Start = time.Now()
+	s.running = true
 	s.mu.Unlock()
-	s.srvr.Serve(s.listener)
+
+	// Run either a throttled or non throttled server.
+	if s.listener != nil {
+		s.srvr.Serve(s.listener)
+	} else {
+		s.srvr.ListenAndServe()
+	}
 }
 
 // StartProfiler is called to enable dynamic profiling.
 func (s *Server) StartProfiler() {
 	s.log.Infof("Starting profiling on http port %d", s.opts.ProfPort)
-
 	hp := fmt.Sprintf("%s:%d", s.info.Hostname, s.info.ProfPort)
 	go func() {
 		err := http.ListenAndServe(hp, nil)
@@ -209,7 +221,9 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.stats.CurrentConns = s.listener.GetConnectedCount() // Get latest live connection count.
+	if s.listener != nil {
+		s.stats.CurrentConns = s.listener.GetConnectedCount() // Get latest live connection count.
+	}
 	mStats := &runtime.MemStats{}
 	runtime.ReadMemStats(mStats)
 	b, _ := json.Marshal(
