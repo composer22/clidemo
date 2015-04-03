@@ -102,7 +102,7 @@ Run `go help` for more guidance, and visit <http://golang.org/> for tutorials, p
 Header should contain:
 
 * Accept: application/json
-* Authorization: Bearer <token>
+* Authorization: Bearer with token
 * Content-Type: application/json
 
 Example cURL:
