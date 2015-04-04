@@ -14,6 +14,20 @@ type Status struct {
 	RouteStats   map[string]map[string]int64 `json:"routeStats"`   // How many requests/bytes came into each route.
 }
 
+// StatusNew is a factory function that returns a new instance of Status.
+// options is an optional list of functions that initialize the structure
+func StatusNew(options ...func(*Status)) *Status {
+	st := &Status{
+		Start:        time.Now(),
+		CurrentConns: -1, // defaults to infinite
+		RouteStats:   make(map[string]map[string]int64),
+	}
+	for _, option := range options {
+		option(st)
+	}
+	return st
+}
+
 // IncrRequestStats increments the stats totals for the server.
 func (s *Status) IncrRequestStats(reqBytes int64) {
 	s.RequestCount++
