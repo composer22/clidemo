@@ -12,6 +12,7 @@ const (
 )
 
 func TestOptionsString(t *testing.T) {
+	t.Parallel()
 	options := &Options{
 		Name:       "Test Options",
 		Hostname:   "localhost",

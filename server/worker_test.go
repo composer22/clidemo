@@ -13,6 +13,7 @@ const (
 )
 
 func TestParseWorker(t *testing.T) {
+	t.Parallel()
 	var wg sync.WaitGroup
 	jobq := make(chan *parseJob)
 	wg.Add(1)

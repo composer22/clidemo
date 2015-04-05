@@ -34,6 +34,7 @@ func TestStatusNew(t *testing.T) {
 }
 
 func TestStatusIncrRequestStats(t *testing.T) {
+	t.Parallel()
 	stats := StatusNew()
 	stats.IncrRequestStats(-1)
 	if stats.RequestCount != 1 {
@@ -54,6 +55,7 @@ func TestStatusIncrRequestStats(t *testing.T) {
 }
 
 func TestStatusIncrRouteStats(t *testing.T) {
+	t.Parallel()
 	stats := StatusNew()
 	stats.IncrRouteStats("Route1", -1)
 
@@ -95,6 +97,7 @@ func TestStatusIncrRouteStats(t *testing.T) {
 }
 
 func TestStatusString(t *testing.T) {
+	t.Parallel()
 	mockTime, _ := time.Parse(time.RFC1123Z, "Mon, 02 Jan 2006 13:24:56 -0000")
 	stats := StatusNew(func(sts *Status) {
 		sts.Start = mockTime

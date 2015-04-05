@@ -44,6 +44,7 @@ func TestInfoNew(t *testing.T) {
 }
 
 func TestInfoString(t *testing.T) {
+	t.Parallel()
 	info := InfoNew(func(i *Info) {
 		i.Version = "9.8.7"
 		i.Name = "Test Server"

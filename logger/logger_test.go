@@ -83,6 +83,7 @@ func TestSetColourLabels(t *testing.T) {
 }
 
 func TestEmergencyf(t *testing.T) {
+	t.Parallel()
 	test_message := "Emergencyf"
 	expectOutput(t, func() {
 		l := New(Debug, false) // Mock the exit so coverage can complete.
@@ -92,6 +93,7 @@ func TestEmergencyf(t *testing.T) {
 }
 
 func TestAlertf(t *testing.T) {
+	t.Parallel()
 	test_message := "Alertf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -100,6 +102,7 @@ func TestAlertf(t *testing.T) {
 }
 
 func TestCriticalf(t *testing.T) {
+	t.Parallel()
 	test_message := "Criticalf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -108,6 +111,7 @@ func TestCriticalf(t *testing.T) {
 }
 
 func TestErrorf(t *testing.T) {
+	t.Parallel()
 	test_message := "Errorf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -116,6 +120,7 @@ func TestErrorf(t *testing.T) {
 }
 
 func TestWarningf(t *testing.T) {
+	t.Parallel()
 	test_message := "Warningf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -124,6 +129,7 @@ func TestWarningf(t *testing.T) {
 }
 
 func TestNoticef(t *testing.T) {
+	t.Parallel()
 	test_message := "Noticef"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -132,6 +138,7 @@ func TestNoticef(t *testing.T) {
 }
 
 func TestInfof(t *testing.T) {
+	t.Parallel()
 	test_message := "Infof"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -140,6 +147,7 @@ func TestInfof(t *testing.T) {
 }
 
 func TestDebugf(t *testing.T) {
+	t.Parallel()
 	test_message := "Debugf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -148,6 +156,7 @@ func TestDebugf(t *testing.T) {
 }
 
 func TestOutputf(t *testing.T) {
+	t.Parallel()
 	test_label := "[OUTPUT] "
 	test_message := "Output"
 	expectOutput(t, func() {

@@ -10,6 +10,7 @@ const (
 )
 
 func TestUtilsCreateV4UUID(t *testing.T) {
+	t.Parallel()
 	r, _ := regexp.Compile(v4UUIDRegExpFmt)
 
 	for i := 0; i < 10; i++ {

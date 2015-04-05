@@ -19,6 +19,7 @@ const (
 
 // TestParserExecute tests the execution of the parser and validates the results.
 func TestParserExecute(t *testing.T) {
+	t.Parallel()
 	p := New()
 	r := bytes.NewBufferString(testParserText)
 	p.Execute(r)
@@ -31,6 +32,7 @@ func TestParserExecute(t *testing.T) {
 
 // TestParserReset tests the reset method.
 func TestParserReset(t *testing.T) {
+	t.Parallel()
 	p := New()
 	r := bytes.NewBufferString(testParserText)
 	p.Execute(r)
