@@ -51,37 +51,22 @@ type Server struct {
 }
 
 // New is a factory function that returns a new server instance.
-func New(opts *Options) *Server {
-	log := logger.New(logger.UseDefault, false)
-
-	// Server information.
-	info := &Info{
-		Version:    version,
-		Name:       opts.Name,
-		Hostname:   opts.Hostname,
-		UUID:       createV4UUID(),
-		Port:       opts.Port,
-		ProfPort:   opts.ProfPort,
-		MaxConn:    opts.MaxConn,
-		MaxWorkers: opts.MaxWorkers,
-		Debug:      opts.Debug,
-	}
-
-	// Stat information.
-	st := &Status{
-		Start:        time.Now(),
-		CurrentConns: -1,
-		RouteStats:   make(map[string]map[string]int64),
-	}
-
-	// Construct server.
+func New(opts *Options, addedOptions ...func(*Server)) *Server {
 	s := &Server{
-		info:    info,
+		info: InfoNew(func(i *Info) {
+			i.Name = opts.Name
+			i.Hostname = opts.Hostname
+			i.Port = opts.Port
+			i.ProfPort = opts.ProfPort
+			i.MaxConn = opts.MaxConn
+			i.MaxWorkers = opts.MaxWorkers
+			i.Debug = opts.Debug
+		}),
 		opts:    opts,
 		auth:    auth.New(),
 		jobq:    make(chan *parseJob),
-		log:     log,
-		stats:   st,
+		log:     logger.New(logger.UseDefault, false),
+		stats:   StatusNew(),
 		running: false,
 	}
 
@@ -101,6 +86,11 @@ func New(opts *Options) *Server {
 
 	// Trap signals
 	s.handleSignals()
+
+	// Additional hook for specialized custom options
+	for _, option := range addedOptions {
+		option(s)
+	}
 	return s
 }
 

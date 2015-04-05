@@ -15,6 +15,19 @@ type Info struct {
 	Debug      bool   `json:"debugEnabled"`   // Is debugging enabled on the server.
 }
 
+// InfoNew is a factory function that returns a new instance of Info.
+// options is an optional list of functions that initialize the structure
+func InfoNew(options ...func(*Info)) *Info {
+	inf := &Info{
+		Version: version,
+		UUID:    createV4UUID(),
+	}
+	for _, option := range options {
+		option(inf)
+	}
+	return inf
+}
+
 // String is an implentation of the Stringer interface so the structure is returned as a string to fmt.Print() etc.
 func (i *Info) String() string {
 	result, _ := json.Marshal(i)

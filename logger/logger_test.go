@@ -12,50 +12,50 @@ import (
 func TestSetAndGetLogLevel(t *testing.T) {
 	l := New(Debug, false)
 	if l.GetLogLevel() != Debug {
-		t.Fatalf("Invalid Log Level Set.\n")
+		t.Errorf("Invalid Log Level Set.\n")
 	}
 	err := l.SetLogLevel(Info)
 	if err != nil {
-		t.Fatalf("Set log level func should have been called correctly for value.\n")
+		t.Errorf("Set log level func should have been called correctly for value.\n")
 	}
 	if l.level != Info {
-		t.Fatalf("Set log level func should have set new value correctly.\n")
+		t.Errorf("Set log level func should have set new value correctly.\n")
 	}
 
 	err = l.SetLogLevel(UseDefault)
 	if err != nil {
-		t.Fatalf("Set log level func should have been called correctly for value.\n")
+		t.Errorf("Set log level func should have been called correctly for value.\n")
 	}
 
 	if l.level != Info {
-		t.Fatalf("Set default log level should have set new value correctly.\n")
+		t.Errorf("Set default log level should have set new value correctly.\n")
 	}
 
 	err = l.SetLogLevel(UseDefault - 1)
 	if err == nil {
-		t.Fatalf("Low param value was not tested properly.\n")
+		t.Errorf("Low param value was not tested properly.\n")
 	}
 	err = l.SetLogLevel(Debug + 1)
 	if err == nil {
-		t.Fatalf("High param value was not tested properly.\n")
+		t.Errorf("High param value was not tested properly.\n")
 	}
 }
 
 func TestDefaultSetLogLevel(t *testing.T) {
 	l := New(UseDefault, false)
 	if l.GetLogLevel() != Info {
-		t.Fatalf("Invalid default Log Level Set.\n")
+		t.Errorf("Invalid default Log Level Set.\n")
 	}
 }
 
 func TestSetErrorFunc(t *testing.T) {
 	l := New(Debug, false)
 	if err := l.SetExitFunc(nil); err == nil {
-		t.Fatalf("Invalid set exit function with nil.\n")
+		t.Errorf("Invalid set exit function with nil.\n")
 	}
 
 	if err := l.SetExitFunc(func(code int) {}); err != nil {
-		t.Fatalf("Invalid set exit function with vald value.\n")
+		t.Errorf("Invalid set exit function with vald value.\n")
 	}
 }
 
@@ -77,12 +77,13 @@ func TestSetColourLabels(t *testing.T) {
 		}
 		expected := fmt.Sprintf(colourFormat, colour, labels[i])
 		if expected != actual {
-			t.Fatalf("Invalid colour label\nExpected:%s\nActual:%s\n", expected, actual)
+			t.Errorf("Invalid colour label\nExpected:%s\nActual:%s\n", expected, actual)
 		}
 	}
 }
 
 func TestEmergencyf(t *testing.T) {
+	t.Parallel()
 	test_message := "Emergencyf"
 	expectOutput(t, func() {
 		l := New(Debug, false) // Mock the exit so coverage can complete.
@@ -92,6 +93,7 @@ func TestEmergencyf(t *testing.T) {
 }
 
 func TestAlertf(t *testing.T) {
+	t.Parallel()
 	test_message := "Alertf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -100,6 +102,7 @@ func TestAlertf(t *testing.T) {
 }
 
 func TestCriticalf(t *testing.T) {
+	t.Parallel()
 	test_message := "Criticalf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -108,6 +111,7 @@ func TestCriticalf(t *testing.T) {
 }
 
 func TestErrorf(t *testing.T) {
+	t.Parallel()
 	test_message := "Errorf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -116,6 +120,7 @@ func TestErrorf(t *testing.T) {
 }
 
 func TestWarningf(t *testing.T) {
+	t.Parallel()
 	test_message := "Warningf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -124,6 +129,7 @@ func TestWarningf(t *testing.T) {
 }
 
 func TestNoticef(t *testing.T) {
+	t.Parallel()
 	test_message := "Noticef"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -132,6 +138,7 @@ func TestNoticef(t *testing.T) {
 }
 
 func TestInfof(t *testing.T) {
+	t.Parallel()
 	test_message := "Infof"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -140,6 +147,7 @@ func TestInfof(t *testing.T) {
 }
 
 func TestDebugf(t *testing.T) {
+	t.Parallel()
 	test_message := "Debugf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
@@ -148,6 +156,7 @@ func TestDebugf(t *testing.T) {
 }
 
 func TestOutputf(t *testing.T) {
+	t.Parallel()
 	test_label := "[OUTPUT] "
 	test_message := "Output"
 	expectOutput(t, func() {
@@ -177,6 +186,6 @@ func expectOutput(t *testing.T, f func(), expected string) {
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
 	if !strings.Contains(out, expected) {
-		t.Fatalf("Expected '%s', received '%s'\n", expected, out)
+		t.Errorf("Expected '%s', received '%s'\n", expected, out)
 	}
 }

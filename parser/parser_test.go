@@ -19,23 +19,25 @@ const (
 
 // TestParserExecute tests the execution of the parser and validates the results.
 func TestParserExecute(t *testing.T) {
+	t.Parallel()
 	p := New()
 	r := bytes.NewBufferString(testParserText)
 	p.Execute(r)
 	result := fmt.Sprint(p)
 	if result != testParserResultJSON {
-		t.Fatalf("Invalid parser results\nExpected:\n\n%s\n\nResult:\n\n%s\n\n",
+		t.Errorf("Invalid parser results\nExpected:\n\n%s\n\nResult:\n\n%s\n\n",
 			testParserResultJSON, result)
 	}
 }
 
 // TestParserReset tests the reset method.
 func TestParserReset(t *testing.T) {
+	t.Parallel()
 	p := New()
 	r := bytes.NewBufferString(testParserText)
 	p.Execute(r)
 	p.Reset()
 	if len(p.Words) != 0 {
-		t.Fatal("Invalid parser Reset().\n")
+		t.Errorf("Invalid parser Reset().\n")
 	}
 }
