@@ -4,5 +4,6 @@ import "testing"
 
 func TestPrintUsageAndExit(t *testing.T) {
 	t.Parallel()
-	t.Skipf("Skipping usage command line options.")
+	// Cannot test an exit point.
+	t.SkipNow()
 }
