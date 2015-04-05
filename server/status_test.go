@@ -9,7 +9,7 @@ import (
 
 const (
 	expectedStatsJSONResult = `{"startTime":"2006-01-02T13:24:56Z","requestCount":0,` +
-		`"requestBytes":0,"currentConns":1234,"routeStats":{"route1":{"requesBytes":202,` +
+		`"requestBytes":0,"connNumAvail":1234,"routeStats":{"route1":{"requesBytes":202,` +
 		`"requestCounts":101},"route2":{"requesBytes":204,"requestCounts":103}}}`
 )
 
@@ -101,7 +101,7 @@ func TestStatusString(t *testing.T) {
 	mockTime, _ := time.Parse(time.RFC1123Z, "Mon, 02 Jan 2006 13:24:56 -0000")
 	stats := StatusNew(func(sts *Status) {
 		sts.Start = mockTime
-		sts.CurrentConns = 1234
+		sts.ConnNumAvail = 1234
 		sts.RouteStats = map[string]map[string]int64{
 			"route1": map[string]int64{"requestCounts": 101, "requesBytes": 202},
 			"route2": map[string]int64{"requestCounts": 103, "requesBytes": 204},

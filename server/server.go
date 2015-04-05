@@ -64,7 +64,6 @@ func New(opts *Options, addedOptions ...func(*Server)) *Server {
 		}),
 		opts:    opts,
 		auth:    auth.New(),
-		jobq:    make(chan *parseJob),
 		log:     logger.New(logger.UseDefault, false),
 		stats:   StatusNew(),
 		running: false,
@@ -107,16 +106,14 @@ func (s *Server) Start() {
 	s.log.Infof("Starting clidemo version %s\n", version)
 	s.mu.Lock()
 
-	// Throttled? Then create a listener.
-	if s.opts.MaxConn > 0 {
-		s.listener, err = ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
-		if err != nil {
-			s.mu.Unlock()
-			s.log.Emergencyf("%s\n", err)
-		}
+	s.listener, err = ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
+	if err != nil {
+		s.mu.Unlock()
+		s.log.Emergencyf("%s\n", err)
 	}
 
 	// Spin off the worker processes.
+	s.jobq = make(chan *parseJob)
 	for i := 0; i < s.info.MaxWorkers; i++ {
 		s.wg.Add(1)
 		go parseWorker(s.jobq, &s.wg)
@@ -130,13 +127,7 @@ func (s *Server) Start() {
 	s.stats.Start = time.Now()
 	s.running = true
 	s.mu.Unlock()
-
-	// Run either a throttled or non throttled server.
-	if s.listener != nil {
-		s.srvr.Serve(s.listener)
-	} else {
-		s.srvr.ListenAndServe()
-	}
+	s.srvr.Serve(s.listener)
 }
 
 // StartProfiler is called to enable dynamic profiling.
@@ -151,6 +142,28 @@ func (s *Server) StartProfiler() {
 	}()
 }
 
+// Shutdown takes down the server gracefully back to an initialize state.
+func (s *Server) Shutdown() bool {
+	if !s.isRunning() {
+		return true
+	}
+
+	s.log.Infof("Begin server service stop...")
+	s.mu.Lock()
+	s.log.Infof("Stopping listener and connections...")
+	s.listener.Stop()
+	s.srvr.SetKeepAlivesEnabled(false)
+	s.log.Infof("Stopping all workers...")
+	close(s.jobq)
+	s.wg.Wait()
+	s.running = false
+	s.jobq = nil
+	s.listener = nil
+	s.mu.Unlock()
+	s.log.Infof("End server service stop.")
+	return true
+}
+
 // handleSignals responds to operating system interrupts such as application kills.
 func (s *Server) handleSignals() {
 	c := make(chan os.Signal, 1)
@@ -158,9 +171,7 @@ func (s *Server) handleSignals() {
 	go func() {
 		for sig := range c {
 			s.log.Infof("Server received signal: %v\n", sig)
-			s.log.Infof("Stopping all workers...")
-			close(s.jobq)
-			s.wg.Wait()
+			s.Shutdown()
 			s.log.Infof("Server exiting.")
 			os.Exit(0)
 		}
@@ -216,7 +227,7 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.listener != nil {
-		s.stats.CurrentConns = s.listener.GetConnectedCount() // Get latest live connection count.
+		s.stats.ConnNumAvail = s.listener.GetConnNumAvail() // Get latest live connection count.
 	}
 	mStats := &runtime.MemStats{}
 	runtime.ReadMemStats(mStats)
