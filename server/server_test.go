@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -271,7 +272,10 @@ func TestParseHandler(t *testing.T) {
 }
 
 func TestServerTakeDown(t *testing.T) {
+
+	time.Sleep(2 * time.Second) // Coverage of timeout in Throttle.
 	testSrvr.Shutdown()
+	testSrvr.Shutdown() // Coverage of isRunning test in Shutdown().
 	if testSrvr.isRunning() {
 		t.Errorf("Server should have shut down.")
 	}
