@@ -271,6 +271,11 @@ func TestParseHandler(t *testing.T) {
 	}
 }
 
+func TestServerPrintVersion(t *testing.T) {
+	t.Parallel()
+	t.Skip("Exit cannot be covered.")
+}
+
 func TestServerTakeDown(t *testing.T) {
 
 	time.Sleep(2 * time.Second) // Coverage of timeout in Throttle.
