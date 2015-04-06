@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -20,7 +21,11 @@ const (
 		`"well":{"counter":1,"sentenceUse":[1]},"winter":{"counter":1,"sentenceUse":[0]}}}}`
 )
 
-func TestRoutes(t *testing.T) {
+var (
+	testSrvr *Server
+)
+
+func TestServerStartup(t *testing.T) {
 	opts := &Options{
 		Name:       "Test Server",
 		Hostname:   "localhost",
@@ -31,10 +36,95 @@ func TestRoutes(t *testing.T) {
 		MaxProcs:   1,
 		Debug:      true,
 	}
-	runtime.GOMAXPROCS(1)
-	srvr := New(opts)
-	go func() { srvr.Start() }()
 
+	runtime.GOMAXPROCS(1)
+	testSrvr = New(opts)
+	go func() { testSrvr.Start() }()
+}
+
+func TestValidHeaders(t *testing.T) {
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", "http://localhost:8080/v1.0/alive", nil)
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ := client.Do(req)
+	b, _ := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body := strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMediaType {
+		t.Errorf("Missing 'Accept' header returned invalid body: %s", body)
+	}
+	if resp.StatusCode != http.StatusUnsupportedMediaType {
+		t.Errorf("Missing 'Accept' header returned invalid  status code %d", resp.StatusCode)
+	}
+
+	req.Header.Add("Accept", "text/html")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMediaType {
+		t.Errorf("Invalid 'Accept' header returned invalid body: %s", body)
+	}
+	if resp.StatusCode != http.StatusUnsupportedMediaType {
+		t.Errorf("Invalid 'Accept' header returned invalid  status code %d", resp.StatusCode)
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Del("Content-Type")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMediaType {
+		t.Errorf("Missing 'Content-Type' header returned invalid body: %s", body)
+	}
+	if resp.StatusCode != http.StatusUnsupportedMediaType {
+		t.Errorf("Missing 'Content-Type' header returned invalid  status code %d", resp.StatusCode)
+	}
+
+	req.Header.Add("Content-Type", "text/html")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMediaType {
+		t.Errorf("Invalid 'Content-Type' header returned invalid body: %s", body)
+	}
+	if resp.StatusCode != http.StatusUnsupportedMediaType {
+		t.Errorf("Invalid 'Content-Type' header returned invalid  status code %d", resp.StatusCode)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Del("Authorization")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidAuthorization {
+		t.Errorf("Missing 'Authorization' header returned invalid body: %s", body)
+	}
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("Missing 'Authorization' header returned invalid  status code %d", resp.StatusCode)
+	}
+
+	req.Header.Add("Authorization", "Bearer XXX3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidAuthorization {
+		t.Errorf("Invalid 'Authorization' header returned invalid body: %s", body)
+	}
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("Invalid 'Authorization' header returned invalid  status code %d", resp.StatusCode)
+	}
+	req.Header.Set("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+}
+
+func TestRoutes(t *testing.T) {
 	client := &http.Client{}
 
 	req, _ := http.NewRequest("GET", "http://localhost:8080/v1.0/status", nil)
@@ -47,10 +137,10 @@ func TestRoutes(t *testing.T) {
 	resp.Body.Close()
 	body := string(b)
 	if body == "" {
-		t.Error("/status body should not be empty.")
+		t.Errorf("/status body should not be empty.")
 	}
 	if resp.StatusCode != 200 {
-		t.Errorf("/status returned invalid  status code %d\n", resp.StatusCode)
+		t.Errorf("/status returned invalid  status code %d", resp.StatusCode)
 	}
 
 	req, _ = http.NewRequest("GET", "http://localhost:8080/v1.0/alive", nil)
@@ -63,10 +153,10 @@ func TestRoutes(t *testing.T) {
 	resp.Body.Close()
 	body = string(b)
 	if body != "" {
-		t.Error("/alive body should be empty.")
+		t.Errorf("/alive body should be empty.")
 	}
 	if resp.StatusCode != 200 {
-		t.Errorf("/alive returned invalid  status code %d\n", resp.StatusCode)
+		t.Errorf("/alive returned invalid  status code %d", resp.StatusCode)
 	}
 
 	req, _ = http.NewRequest("POST", "http://localhost:8080/v1.0/parse",
@@ -85,10 +175,20 @@ func TestRoutes(t *testing.T) {
 	if body != testParserResultJSON {
 		t.Errorf("/parse returned invalid results: %s", body)
 	}
-
 	if resp.StatusCode != 200 {
-		t.Errorf("Invalid /parse status code %d\n", resp.StatusCode)
+		t.Errorf("Invalid /parse status code %d", resp.StatusCode)
 	}
+}
 
-	srvr.Shutdown()
+func TestServerTakeDown(t *testing.T) {
+	testSrvr.Shutdown()
+	testSrvr = nil
+
+	var maxTimeout time.Duration
+	if TCPReadTimeout > TCPWriteTimeout {
+		maxTimeout = TCPReadTimeout
+	} else {
+		maxTimeout = TCPWriteTimeout
+	}
+	time.Sleep(maxTimeout + (1 * time.Second))
 }

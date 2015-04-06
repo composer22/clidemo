@@ -14,18 +14,36 @@ var (
 // ThrottledConn is a wrapper over net.conn that allows us to throttle connections via the listener.
 type ThrottledConn struct {
 	*net.TCPConn
-	wg        sync.WaitGroup
 	acceptCh  chan bool
 	closeOnce sync.Once
 }
 
-// Close overloads the class function of the connection so that the listener throttle can be serviced.
+// Close overloads the type function of the connection so that the listener throttle can be serviced.
 func (c *ThrottledConn) Close() error {
 	var err error
 	c.closeOnce.Do(func() {
-		defer c.wg.Done()
 		c.Done()
 		err = c.TCPConn.Close()
+	})
+	return err
+}
+
+// CloseRead overloads the type function of the connection so that the listener throttle can be serviced.
+func (c *ThrottledConn) CloseRead() error {
+	var err error
+	c.closeOnce.Do(func() {
+		c.Done()
+		err = c.TCPConn.CloseRead()
+	})
+	return err
+}
+
+// CloseWrite overloads the type function of the connection so that the listener throttle can be serviced.
+func (c *ThrottledConn) CloseWrite() error {
+	var err error
+	c.closeOnce.Do(func() {
+		c.Done()
+		err = c.TCPConn.CloseWrite()
 	})
 	return err
 }
@@ -40,9 +58,8 @@ func (c *ThrottledConn) Done() {
 // ThrottledListener is a wrapper on a listener that limits connections.
 type ThrottledListener struct {
 	*net.TCPListener
-	wg       sync.WaitGroup // For waiting on connections to close
-	acceptCh chan bool      // Queue for service tokens.
-	stopCh   chan bool      // Shutdown server requested.
+	acceptCh chan bool // Queue for service tokens.
+	stopCh   chan bool // Shutdown server requested.
 	maxConns int
 }
 
@@ -72,40 +89,39 @@ func ThrottledListenerNew(addr string, maxConnAllowed int) (*ThrottledListener, 
 // Accept overrides the accept function of the listener so that waits can occur on tokens in the queue.
 func (t *ThrottledListener) Accept() (net.Conn, error) {
 	for {
-		// Wait to grab a token and service a connection.
+		// Wait to grab a token if we are in restricted mode.
 		if t.acceptCh != nil {
 			<-t.acceptCh
 		}
 
-		// Look for a request
+		// Look for a request for one second.
 		t.SetDeadline(time.Now().Add(time.Second))
-		conn, err := t.TCPListener.AcceptTCP()
-		if err != nil {
-			if t.acceptCh != nil {
-				t.acceptCh <- true // err so put token back
-			}
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() && netErr.Temporary() {
-				continue // Its a timeout, so try again...
-			}
-			return nil, err
-		}
+		conn, err := t.AcceptTCP()
 
 		// Check for shutdown signal
 		select {
 		case <-t.stopCh:
-			t.wg.Wait()
 			t.Close()
 			return nil, StoppedError
 		default: // continue
 		}
 
-		// Set connection to stay alive and return it.
+		if err != nil {
+			// Return token if we are in restricted mode.
+			if t.acceptCh != nil {
+				t.acceptCh <- true
+			}
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() && netErr.Temporary() {
+				continue
+			}
+			return nil, err
+		}
+
+		// Set connection to stay alive n-time and return it.
 		conn.SetKeepAlive(true)
-		conn.SetKeepAlivePeriod(TCPConnectionTimeout)
-		t.wg.Add(1)
+		conn.SetKeepAlivePeriod(TCPKeepAliveTimeout)
 		return &ThrottledConn{
 			TCPConn:  conn,
-			wg:       t.wg,
 			acceptCh: t.acceptCh,
 		}, nil
 	}
