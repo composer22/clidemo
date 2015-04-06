@@ -222,7 +222,7 @@ func TestRoutes(t *testing.T) {
 	resp.Body.Close()
 	body = string(b)
 	if body == "" {
-		t.Errorf("Body should not be empty\n")
+		t.Errorf("Body should not be empty.")
 	}
 	if body != testParserResultJSON {
 		t.Errorf("/parse returned invalid results: %s", body)
@@ -272,5 +272,8 @@ func TestParseHandler(t *testing.T) {
 
 func TestServerTakeDown(t *testing.T) {
 	testSrvr.Shutdown()
+	if testSrvr.isRunning() {
+		t.Errorf("Server should have shut down.")
+	}
 	testSrvr = nil
 }

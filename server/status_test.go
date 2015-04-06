@@ -18,18 +18,18 @@ func TestStatusNew(t *testing.T) {
 	tp := reflect.TypeOf(stats)
 
 	if tp.Kind() != reflect.Ptr {
-		t.Fatalf("Status not created as a pointer.\n")
+		t.Fatalf("Status not created as a pointer.")
 	}
 
 	tp = tp.Elem()
 	if tp.Kind() != reflect.Struct {
-		t.Fatalf("Status not created as a struct.\n")
+		t.Fatalf("Status not created as a struct.")
 	}
 	if tp.Name() != "Status" {
-		t.Fatalf("Status struct is not named correctly.\n")
+		t.Fatalf("Status struct is not named correctly.")
 	}
 	if !(tp.NumField() > 0) {
-		t.Fatalf("Status struct is empty.\n")
+		t.Fatalf("Status struct is empty.")
 	}
 }
 
@@ -38,19 +38,19 @@ func TestStatusIncrRequestStats(t *testing.T) {
 	stats := StatusNew()
 	stats.IncrRequestStats(-1)
 	if stats.RequestCount != 1 {
-		t.Errorf("Status RequestCount not incremented correctly.\n")
+		t.Errorf("Status RequestCount not incremented correctly.")
 	}
 	if stats.RequestBytes != 0 {
-		t.Errorf("Status RequestBytes should not have been incremented or decremented.\n")
+		t.Errorf("Status RequestBytes should not have been incremented or decremented.")
 	}
 
 	stats.IncrRequestStats(101)
 	stats.IncrRequestStats(99)
 	if stats.RequestCount != 3 {
-		t.Errorf("Status RequestCount not incremented correctly.\n")
+		t.Errorf("Status RequestCount not incremented correctly.")
 	}
 	if stats.RequestBytes != 200 {
-		t.Errorf("Status RequestBytes should have been incremented.\n")
+		t.Errorf("Status RequestBytes should have been incremented.")
 	}
 }
 
@@ -61,23 +61,23 @@ func TestStatusIncrRouteStats(t *testing.T) {
 
 	rs, ok := stats.RouteStats["Route1"]
 	if !ok {
-		t.Errorf(`Status RouteStats["Route1"] entry not created correctly.\n`)
+		t.Errorf(`Status RouteStats["Route1"] entry not created correctly.`)
 	}
 	if len(rs) != 1 {
-		t.Errorf(`Status RouteStats["Route1"] entry invalid size.\n`)
+		t.Errorf(`Status RouteStats["Route1"] entry invalid size.`)
 	}
 
 	rc, ok := rs["requestCount"]
 	if !ok {
-		t.Errorf(`Status RouteStats["Route1"]["requestCount"] entry not created correctly.\n`)
+		t.Errorf(`Status RouteStats["Route1"]["requestCount"] entry not created correctly.`)
 	}
 	if rc != 1 {
-		t.Errorf(`Status RouteStats["Route1"]["requestCount"] should have been incremented.\n`)
+		t.Errorf(`Status RouteStats["Route1"]["requestCount"] should have been incremented.`)
 	}
 
 	rc, ok = rs["requestBytes"]
 	if ok {
-		t.Errorf(`Status RouteStats["Route1"]["requestBytes"] entry should not have been created.\n`)
+		t.Errorf(`Status RouteStats["Route1"]["requestBytes"] entry should not have been created.`)
 	}
 
 	stats = StatusNew()
@@ -85,14 +85,14 @@ func TestStatusIncrRouteStats(t *testing.T) {
 	stats.IncrRouteStats("Route2", 201)
 	stats.IncrRouteStats("Route2", 98)
 	if stats.RouteStats["Route2"]["requestCount"] != 3 {
-		t.Errorf(`Status["Route2"]["requestCount"] not incremented correctly.\n`)
+		t.Errorf(`Status["Route2"]["requestCount"] not incremented correctly.`)
 	}
 	_, ok = stats.RouteStats["Route2"]["requestBytes"]
 	if !ok {
-		t.Errorf(`Status RouteStats["Route1"]["requestBytes"] entry should have been created.\n`)
+		t.Errorf(`Status RouteStats["Route1"]["requestBytes"] entry should have been created.`)
 	}
 	if stats.RouteStats["Route2"]["requestBytes"] != 299 {
-		t.Errorf(`Status["Route2"]["requestBytes"] not incremented correctly.\n`)
+		t.Errorf(`Status["Route2"]["requestBytes"] not incremented correctly.`)
 	}
 }
 
@@ -108,6 +108,6 @@ func TestStatusString(t *testing.T) {
 		}
 	})
 	if fmt.Sprint(stats) != expectedStatsJSONResult {
-		t.Errorf("Status not converted to json string.\n")
+		t.Errorf("Status not converted to json string.")
 	}
 }

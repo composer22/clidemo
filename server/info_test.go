@@ -27,18 +27,18 @@ func TestInfoNew(t *testing.T) {
 	tp := reflect.TypeOf(info)
 
 	if tp.Kind() != reflect.Ptr {
-		t.Fatalf("Info not created as a pointer.\n")
+		t.Fatalf("Info not created as a pointer.")
 	}
 
 	tp = tp.Elem()
 	if tp.Kind() != reflect.Struct {
-		t.Fatalf("Info not created as a struct.\n")
+		t.Fatalf("Info not created as a struct.")
 	}
 	if tp.Name() != "Info" {
-		t.Fatalf("Info struct is not named correctly.\n")
+		t.Fatalf("Info struct is not named correctly.")
 	}
 	if !(tp.NumField() > 0) {
-		t.Fatalf("Info struct is empty.\n")
+		t.Fatalf("Info struct is empty.")
 	}
 
 }
@@ -57,6 +57,6 @@ func TestInfoString(t *testing.T) {
 		i.Debug = true
 	})
 	if fmt.Sprint(info) != expectedInfoJSONResult {
-		t.Errorf("Info not converted to json string.\n")
+		t.Errorf("Info not converted to json string.")
 	}
 }

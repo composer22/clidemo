@@ -16,14 +16,14 @@ func TestUtilsCreateV4UUID(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		uuid := createV4UUID()
 		if !r.MatchString(uuid) {
-			t.Errorf("UUID not V4 standard.\n")
+			t.Errorf("UUID not V4 standard.")
 			break
 		}
 	}
 	uuid1 := createV4UUID()
 	uuid2 := createV4UUID()
 	if uuid1 == uuid2 {
-		t.Errorf("UUID not being created uniquely.\n")
+		t.Errorf("UUID not being created uniquely.")
 	}
 
 }

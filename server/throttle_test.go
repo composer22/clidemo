@@ -10,24 +10,20 @@ func TestThrottleConnClose(t *testing.T) {
 
 func TestThrottleConnDone(t *testing.T) {
 	t.Parallel()
-	// Covered by server test.
-	t.SkipNow()
+	t.Skip("Covered by server test.")
 }
 
 func TestThrottleListenerNew(t *testing.T) {
 	t.Parallel()
-	// Covered by server test.
-	t.SkipNow()
+	t.Skip("Covered by server test.")
 }
 
 func TestThrottleListenerAccept(t *testing.T) {
 	t.Parallel()
-	// Covered by server test.
-	t.SkipNow()
+	t.Skip("Covered by server test.")
 }
 
 func TestThrottleListenerGetConnectedCount(t *testing.T) {
 	t.Parallel()
-	// Covered by server test.
-	t.SkipNow()
+	t.Skip("Covered by server test.")
 }

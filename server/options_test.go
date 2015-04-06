@@ -24,6 +24,6 @@ func TestOptionsString(t *testing.T) {
 		Debug:      true,
 	}
 	if fmt.Sprint(options) != expectedOptionsJSONResult {
-		t.Errorf("Options not converted to json string.\n")
+		t.Errorf("Options not converted to json string.")
 	}
 }
