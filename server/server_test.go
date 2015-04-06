@@ -38,7 +38,7 @@ func TestServerStartup(t *testing.T) {
 	}
 
 	runtime.GOMAXPROCS(1)
-	testSrvr = New(opts)
+	testSrvr = New(opts, func(s *Server) {})
 	go func() { testSrvr.Start() }()
 }
 
@@ -124,6 +124,59 @@ func TestValidHeaders(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
 }
 
+func TestMethods(t *testing.T) {
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", "http://localhost:8080/v1.0/status", nil)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ := client.Do(req)
+	b, _ := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body := strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMethod {
+		t.Errorf("/status body should return method error.")
+	}
+	if resp.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("/status returned invalid method status code %d", resp.StatusCode)
+	}
+
+	req, _ = http.NewRequest("POST", "http://localhost:8080/v1.0/alive", nil)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMethod {
+		t.Errorf("/alive body should return method error.")
+	}
+	if resp.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("/alive returned invalid method status code %d", resp.StatusCode)
+	}
+
+	req, _ = http.NewRequest("GET", "http://localhost:8080/v1.0/parse",
+		strings.NewReader(fmt.Sprintf(`{"text":"%s"}`, testParserText)))
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidMethod {
+		t.Errorf("/parse body should return method error.")
+	}
+	if resp.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("/parse returned invalid method status code %d", resp.StatusCode)
+	}
+}
+
 func TestRoutes(t *testing.T) {
 	client := &http.Client{}
 
@@ -139,8 +192,8 @@ func TestRoutes(t *testing.T) {
 	if body == "" {
 		t.Errorf("/status body should not be empty.")
 	}
-	if resp.StatusCode != 200 {
-		t.Errorf("/status returned invalid  status code %d", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("/status returned invalid status code %d", resp.StatusCode)
 	}
 
 	req, _ = http.NewRequest("GET", "http://localhost:8080/v1.0/alive", nil)
@@ -155,8 +208,8 @@ func TestRoutes(t *testing.T) {
 	if body != "" {
 		t.Errorf("/alive body should be empty.")
 	}
-	if resp.StatusCode != 200 {
-		t.Errorf("/alive returned invalid  status code %d", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("/alive returned invalid status code %d", resp.StatusCode)
 	}
 
 	req, _ = http.NewRequest("POST", "http://localhost:8080/v1.0/parse",
@@ -170,25 +223,66 @@ func TestRoutes(t *testing.T) {
 	resp.Body.Close()
 	body = string(b)
 	if body == "" {
-		t.Errorf("Body should not be empty\n")
+		t.Errorf("Body should not be empty.")
 	}
 	if body != testParserResultJSON {
 		t.Errorf("/parse returned invalid results: %s", body)
 	}
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Invalid /parse status code %d", resp.StatusCode)
 	}
 }
 
-func TestServerTakeDown(t *testing.T) {
-	testSrvr.Shutdown()
-	testSrvr = nil
+func TestParseHandler(t *testing.T) {
+	client := &http.Client{}
 
-	var maxTimeout time.Duration
-	if TCPReadTimeout > TCPWriteTimeout {
-		maxTimeout = TCPReadTimeout
-	} else {
-		maxTimeout = TCPWriteTimeout
+	req, _ := http.NewRequest("POST", "http://localhost:8080/v1.0/parse",
+		strings.NewReader(fmt.Sprintf(`"text":"%s"`, testParserText)))
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ := client.Do(req)
+	b, _ := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body := strings.TrimSuffix(string(b), "\n")
+	if body != InvalidJSONText {
+		t.Errorf("JSON body should have been found invalid.")
 	}
-	time.Sleep(maxTimeout + (1 * time.Second))
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("/parse status code incorrect for bad JSON: %d", resp.StatusCode)
+	}
+
+	req, _ = http.NewRequest("POST", "http://localhost:8080/v1.0/parse",
+		strings.NewReader(`{"monkey":"monkeytext"}`))
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer 3A3E6C4C51F12DF2415682CCF9D18")
+	resp, _ = client.Do(req)
+	b, _ = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	body = strings.TrimSuffix(string(b), "\n")
+	if body != InvalidJSONAttribute {
+		t.Errorf("JSON attr should have been found invalid.")
+	}
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("/parse status code incorrect for bad JSON attr: %d", resp.StatusCode)
+	}
+}
+
+func TestServerPrintVersion(t *testing.T) {
+	t.Parallel()
+	t.Skip("Exit cannot be covered.")
+}
+
+func TestServerTakeDown(t *testing.T) {
+
+	time.Sleep(2 * time.Second) // Coverage of timeout in Throttle.
+	testSrvr.Shutdown()
+	testSrvr.Shutdown() // Coverage of isRunning test in Shutdown().
+	if testSrvr.isRunning() {
+		t.Errorf("Server should have shut down.")
+	}
+	testSrvr = nil
 }

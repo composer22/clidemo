@@ -12,50 +12,50 @@ import (
 func TestSetAndGetLogLevel(t *testing.T) {
 	l := New(Debug, false)
 	if l.GetLogLevel() != Debug {
-		t.Errorf("Invalid Log Level Set.\n")
+		t.Errorf("Invalid Log Level Set.")
 	}
 	err := l.SetLogLevel(Info)
 	if err != nil {
-		t.Errorf("Set log level func should have been called correctly for value.\n")
+		t.Errorf("Set log level func should have been called correctly for value.")
 	}
 	if l.level != Info {
-		t.Errorf("Set log level func should have set new value correctly.\n")
+		t.Errorf("Set log level func should have set new value correctly.")
 	}
 
 	err = l.SetLogLevel(UseDefault)
 	if err != nil {
-		t.Errorf("Set log level func should have been called correctly for value.\n")
+		t.Errorf("Set log level func should have been called correctly for value.")
 	}
 
 	if l.level != Info {
-		t.Errorf("Set default log level should have set new value correctly.\n")
+		t.Errorf("Set default log level should have set new value correctly.")
 	}
 
 	err = l.SetLogLevel(UseDefault - 1)
 	if err == nil {
-		t.Errorf("Low param value was not tested properly.\n")
+		t.Errorf("Low param value was not tested properly.")
 	}
 	err = l.SetLogLevel(Debug + 1)
 	if err == nil {
-		t.Errorf("High param value was not tested properly.\n")
+		t.Errorf("High param value was not tested properly.")
 	}
 }
 
 func TestDefaultSetLogLevel(t *testing.T) {
 	l := New(UseDefault, false)
 	if l.GetLogLevel() != Info {
-		t.Errorf("Invalid default Log Level Set.\n")
+		t.Errorf("Invalid default Log Level Set.")
 	}
 }
 
 func TestSetErrorFunc(t *testing.T) {
 	l := New(Debug, false)
 	if err := l.SetExitFunc(nil); err == nil {
-		t.Errorf("Invalid set exit function with nil.\n")
+		t.Errorf("Invalid set exit function with nil.")
 	}
 
 	if err := l.SetExitFunc(func(code int) {}); err != nil {
-		t.Errorf("Invalid set exit function with vald value.\n")
+		t.Errorf("Invalid set exit function with vald value.")
 	}
 }
 
@@ -77,7 +77,7 @@ func TestSetColourLabels(t *testing.T) {
 		}
 		expected := fmt.Sprintf(colourFormat, colour, labels[i])
 		if expected != actual {
-			t.Errorf("Invalid colour label\nExpected:%s\nActual:%s\n", expected, actual)
+			t.Errorf("Invalid colour label\nExpected:%s\nActual:%s", expected, actual)
 		}
 	}
 }
@@ -186,6 +186,6 @@ func expectOutput(t *testing.T, f func(), expected string) {
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
 	if !strings.Contains(out, expected) {
-		t.Errorf("Expected '%s', received '%s'\n", expected, out)
+		t.Errorf("Expected '%s', received '%s'.", expected, out)
 	}
 }

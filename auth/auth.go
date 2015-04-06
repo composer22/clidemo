@@ -18,12 +18,12 @@ type Auth struct {
 	Tokens map[string]bool
 }
 
-// New is a factory method that returns an instance of Auth
+// New is a factory method that returns an instance of Auth.
 func New() *Auth {
 	return &Auth{Tokens: tokens}
 }
 
-// Validate returns true if the token was found and is valid
+// Validate returns true if the token was found and is valid.
 func (t *Auth) Valid(token string) bool {
 	a, ok := t.Tokens[token]
 	if !ok {

@@ -25,7 +25,7 @@ func TestParseWorker(t *testing.T) {
 	jobq <- &job
 	<-job.DoneCh
 	if job.Result != expectedWorkerJSONResult {
-		t.Errorf("Worker expected parse doesn't match result.\n")
+		t.Errorf("Worker expected parse doesn't match result.")
 	}
 	close(jobq)
 	wg.Wait()

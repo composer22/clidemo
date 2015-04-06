@@ -19,31 +19,12 @@ type ThrottledConn struct {
 }
 
 // Close overloads the type function of the connection so that the listener throttle can be serviced.
+// TODO If file streaming is needed in the future, also add CloseRead() and CloseWrite() coverage.
 func (c *ThrottledConn) Close() error {
 	var err error
 	c.closeOnce.Do(func() {
 		c.Done()
 		err = c.TCPConn.Close()
-	})
-	return err
-}
-
-// CloseRead overloads the type function of the connection so that the listener throttle can be serviced.
-func (c *ThrottledConn) CloseRead() error {
-	var err error
-	c.closeOnce.Do(func() {
-		c.Done()
-		err = c.TCPConn.CloseRead()
-	})
-	return err
-}
-
-// CloseWrite overloads the type function of the connection so that the listener throttle can be serviced.
-func (c *ThrottledConn) CloseWrite() error {
-	var err error
-	c.closeOnce.Do(func() {
-		c.Done()
-		err = c.TCPConn.CloseWrite()
 	})
 	return err
 }
@@ -86,7 +67,8 @@ func ThrottledListenerNew(addr string, maxConnAllowed int) (*ThrottledListener, 
 	}, nil
 }
 
-// Accept overrides the accept function of the listener so that waits can occur on tokens in the queue.
+// Accept overrides the accept function of the listener so that waits can occur on
+// tokens in the queue.
 func (t *ThrottledListener) Accept() (net.Conn, error) {
 	for {
 		// Wait to grab a token if we are in restricted mode.

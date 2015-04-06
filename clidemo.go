@@ -43,13 +43,18 @@ func main() {
 	flag.StringVar(&opts.Hostname, "--hostname", server.DefaultHostname, "Name of the server")
 	flag.IntVar(&opts.Port, "p", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.Port, "--port", server.DefaultPort, "Port to listen on (default: 49152)")
-	flag.IntVar(&opts.ProfPort, "L", server.DefaultProfPort, "Profiler Port to listen on (default: <= 0 is off)")
-	flag.IntVar(&opts.ProfPort, "--profiler_port", server.DefaultProfPort, "Profiler Port to listen on (default: <= 0 is off)")
-	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections, "Maximum server connections allowed (default: 0 no restriction)")
+	flag.IntVar(&opts.ProfPort, "L", server.DefaultProfPort,
+		"Profiler Port to listen on (default: <= 0 is off)")
+	flag.IntVar(&opts.ProfPort, "--profiler_port", server.DefaultProfPort,
+		"Profiler Port to listen on (default: <= 0 is off)")
+	flag.IntVar(&opts.MaxConn, "n", server.DefaultMaxConnections,
+		"Maximum server connections allowed (default: 0 no restriction)")
 	flag.IntVar(&opts.MaxConn, "--connections", server.DefaultMaxConnections,
 		"Maximum server connections allowed (default: 0 no restriction)")
-	flag.IntVar(&opts.MaxWorkers, "W", server.DefaultMaxWorkers, "Maximum running workers allowed (default: 1000)")
-	flag.IntVar(&opts.MaxWorkers, "--workers", server.DefaultMaxWorkers, "Maximum running workers allowed (default: 1000)")
+	flag.IntVar(&opts.MaxWorkers, "W", server.DefaultMaxWorkers,
+		"Maximum running workers allowed (default: 1000)")
+	flag.IntVar(&opts.MaxWorkers, "--workers", server.DefaultMaxWorkers,
+		"Maximum running workers allowed (default: 1000)")
 	flag.IntVar(&opts.MaxProcs, "X", server.DefaultMaxProcs,
 		"Maximum processor cores to use from the machine (default: <= 0 is no change")
 	flag.IntVar(&opts.MaxProcs, "--procs", server.DefaultMaxProcs,

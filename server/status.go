@@ -19,7 +19,7 @@ type Status struct {
 func StatusNew(options ...func(*Status)) *Status {
 	st := &Status{
 		Start:        time.Now(),
-		ConnNumAvail: -1, // defaults to infinite
+		ConnNumAvail: -1, // defaults to infinite.
 		RouteStats:   make(map[string]map[string]int64),
 	}
 	for _, option := range options {
@@ -48,7 +48,8 @@ func (s *Status) IncrRouteStats(path string, reqBytes int64) {
 	}
 }
 
-// String is an implentation of the Stringer interface so the structure is returned as a string to fmt.Print() etc.
+// String is an implentation of the Stringer interface so the structure is returned as a
+// string to fmt.Print() etc.
 func (s *Status) String() string {
 	result, _ := json.Marshal(s)
 	return string(result)

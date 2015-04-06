@@ -4,6 +4,5 @@ import "testing"
 
 func TestMiddlewareServeHTTP(t *testing.T) {
 	t.Parallel()
-	// Covered by server test.
-	t.SkipNow()
+	t.Skip("Covered by server test.")
 }
