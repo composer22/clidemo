@@ -17,7 +17,7 @@ Some demonstration objectives:
 * CLI submission of data by file or by pipe.
 * Concurrent worker jobqueue (here with a simple text parser/scanner).
 * Webserver API:
-    + Custom connection listener for throttling connections.
+    + Custom connection listener for optional throttling of connections.
     + Middleware for globally validating incoming requests.
     + Status information from the system.
     + Integration of pprof for performance profiling.
@@ -80,7 +80,7 @@ command line flags only
 
 ## Building
 
-This code currently requires at version 1.42 of Go, but we encourage the use of the latest stable release.
+This code currently requires version 1.42 or higher of Go, but we encourage the use of the latest stable release.
 
 Information on Golang installation, including pre-built binaries, is available at
 <http://golang.org/doc/install>.  Stable branches of operating system packagers provided by

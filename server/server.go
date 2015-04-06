@@ -64,7 +64,6 @@ func New(opts *Options, addedOptions ...func(*Server)) *Server {
 		}),
 		opts:    opts,
 		auth:    auth.New(),
-		jobq:    make(chan *parseJob),
 		log:     logger.New(logger.UseDefault, false),
 		stats:   StatusNew(),
 		running: false,
@@ -80,12 +79,13 @@ func New(opts *Options, addedOptions ...func(*Server)) *Server {
 	mux.HandleFunc(httpRouteParseV1, s.parseHandler)
 	mux.HandleFunc(httpRouteStatusV1, s.statusHandler)
 	s.srvr = &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", s.info.Hostname, s.info.Port),
-		Handler: &Middleware{serv: s, handler: mux},
+		Addr:         fmt.Sprintf("%s:%d", s.info.Hostname, s.info.Port),
+		Handler:      &Middleware{serv: s, handler: mux},
+		ReadTimeout:  TCPReadTimeout,
+		WriteTimeout: TCPWriteTimeout,
 	}
 
-	// Trap signals
-	s.handleSignals()
+	s.handleSignals() // Evoke trap signals handler
 
 	// Additional hook for specialized custom options
 	for _, option := range addedOptions {
@@ -107,16 +107,14 @@ func (s *Server) Start() {
 	s.log.Infof("Starting clidemo version %s\n", version)
 	s.mu.Lock()
 
-	// Throttled? Then create a listener.
-	if s.opts.MaxConn > 0 {
-		s.listener, err = ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
-		if err != nil {
-			s.mu.Unlock()
-			s.log.Emergencyf("%s\n", err)
-		}
+	s.listener, err = ThrottledListenerNew(s.srvr.Addr, s.info.MaxConn)
+	if err != nil {
+		s.mu.Unlock()
+		s.log.Emergencyf("%s\n", err)
 	}
 
 	// Spin off the worker processes.
+	s.jobq = make(chan *parseJob)
 	for i := 0; i < s.info.MaxWorkers; i++ {
 		s.wg.Add(1)
 		go parseWorker(s.jobq, &s.wg)
@@ -130,13 +128,7 @@ func (s *Server) Start() {
 	s.stats.Start = time.Now()
 	s.running = true
 	s.mu.Unlock()
-
-	// Run either a throttled or non throttled server.
-	if s.listener != nil {
-		s.srvr.Serve(s.listener)
-	} else {
-		s.srvr.ListenAndServe()
-	}
+	s.srvr.Serve(s.listener)
 }
 
 // StartProfiler is called to enable dynamic profiling.
@@ -151,6 +143,28 @@ func (s *Server) StartProfiler() {
 	}()
 }
 
+// Shutdown takes down the server gracefully back to an initialize state.
+func (s *Server) Shutdown() bool {
+	if !s.isRunning() {
+		return true
+	}
+
+	s.log.Infof("Begin server service stop...")
+	s.mu.Lock()
+	s.log.Infof("Stopping listener and connections...")
+	s.listener.Stop()
+	s.srvr.SetKeepAlivesEnabled(false)
+	s.log.Infof("Stopping all workers...")
+	close(s.jobq)
+	s.wg.Wait()
+	s.running = false
+	s.jobq = nil
+	s.listener = nil
+	s.mu.Unlock()
+	s.log.Infof("End server service stop.")
+	return true
+}
+
 // handleSignals responds to operating system interrupts such as application kills.
 func (s *Server) handleSignals() {
 	c := make(chan os.Signal, 1)
@@ -158,9 +172,7 @@ func (s *Server) handleSignals() {
 	go func() {
 		for sig := range c {
 			s.log.Infof("Server received signal: %v\n", sig)
-			s.log.Infof("Stopping all workers...")
-			close(s.jobq)
-			s.wg.Wait()
+			s.Shutdown()
 			s.log.Infof("Server exiting.")
 			os.Exit(0)
 		}
@@ -184,16 +196,16 @@ func (s *Server) parseHandler(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, invalidBody, http.StatusBadRequest)
+		http.Error(w, InvalidBody, http.StatusBadRequest)
 		return
 	}
 	if err := json.Unmarshal(b, &data); err != nil {
-		http.Error(w, invalidJSONText, http.StatusBadRequest)
+		http.Error(w, InvalidJSONText, http.StatusBadRequest)
 		return
 	}
 	d, ok := data["text"].(string)
 	if !ok {
-		http.Error(w, invalidJSONAttribute, http.StatusBadRequest)
+		http.Error(w, InvalidJSONAttribute, http.StatusBadRequest)
 		return
 	}
 
@@ -216,7 +228,7 @@ func (s *Server) statusHandler(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.listener != nil {
-		s.stats.CurrentConns = s.listener.GetConnectedCount() // Get latest live connection count.
+		s.stats.ConnNumAvail = s.listener.GetConnNumAvail() // Get latest live connection count.
 	}
 	mStats := &runtime.MemStats{}
 	runtime.ReadMemStats(mStats)
@@ -257,7 +269,7 @@ func (s *Server) initResponseHeader(w http.ResponseWriter) {
 // invalidHeader validates that the header information is acceptable for processing the request from the client.
 func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request) bool {
 	if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("Accept") != "application/json" {
-		http.Error(w, invalidMediaType, http.StatusUnsupportedMediaType)
+		http.Error(w, InvalidMediaType, http.StatusUnsupportedMediaType)
 		return true
 	}
 	return false
@@ -266,7 +278,7 @@ func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request) bool {
 // invalidAuth validates that the Authorization token is valid for using the API
 func (s *Server) invalidAuth(w http.ResponseWriter, r *http.Request) bool {
 	if !s.auth.Valid(strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", -1)) {
-		http.Error(w, invalidAuthorization, http.StatusUnauthorized)
+		http.Error(w, InvalidAuthorization, http.StatusUnauthorized)
 		return true
 	}
 	return false
@@ -275,7 +287,7 @@ func (s *Server) invalidAuth(w http.ResponseWriter, r *http.Request) bool {
 // invalidMethod validates that the http method is acceptable for processing this route.
 func (s *Server) invalidMethod(w http.ResponseWriter, r *http.Request, method string) bool {
 	if r.Method != method {
-		http.Error(w, invalidMediaType, http.StatusUnsupportedMediaType)
+		http.Error(w, InvalidMethod, http.StatusMethodNotAllowed)
 		return true
 	}
 	return false

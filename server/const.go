@@ -14,7 +14,9 @@ const (
 	// * zeros = no change or no limitations or not enabled.
 
 	// Listener and connections.
-	TCPConnectionTimeout = 3 * time.Minute
+	TCPKeepAliveTimeout = 3 * time.Minute
+	TCPReadTimeout      = 10 * time.Second
+	TCPWriteTimeout     = 10 * time.Second
 
 	// http: routes.
 	httpRouteAliveV1  = "/v1.0/alive"
@@ -30,9 +32,10 @@ const (
 	httpPatch  = "PATCH"
 
 	// Error messages.
-	invalidMediaType     = "Invalid Content-Type or Accept header value."
-	invalidBody          = "Invalid body of text in request."
-	invalidJSONText      = "Invalid JSON format in text of body in request."
-	invalidJSONAttribute = "Invalid - 'text' attribute in JSON not found."
-	invalidAuthorization = "Invalid authorization."
+	InvalidMediaType     = "Invalid Content-Type or Accept header value."
+	InvalidMethod        = "Invalid Method for this route."
+	InvalidBody          = "Invalid body of text in request."
+	InvalidJSONText      = "Invalid JSON format in text of body in request."
+	InvalidJSONAttribute = "Invalid - 'text' attribute in JSON not found."
+	InvalidAuthorization = "Invalid authorization."
 )

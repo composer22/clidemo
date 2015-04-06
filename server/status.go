@@ -10,7 +10,7 @@ type Status struct {
 	Start        time.Time                   `json:"startTime"`    // The start time of the server.
 	RequestCount int64                       `json:"requestCount"` // How many requests came in to the server.
 	RequestBytes int64                       `json:"requestBytes"` // Size of the requests in bytes.
-	CurrentConns int                         `json:"currentConns"` // Current number of live connections.
+	ConnNumAvail int                         `json:"connNumAvail"` // Number of live connections available.
 	RouteStats   map[string]map[string]int64 `json:"routeStats"`   // How many requests/bytes came into each route.
 }
 
@@ -19,7 +19,7 @@ type Status struct {
 func StatusNew(options ...func(*Status)) *Status {
 	st := &Status{
 		Start:        time.Now(),
-		CurrentConns: -1, // defaults to infinite
+		ConnNumAvail: -1, // defaults to infinite
 		RouteStats:   make(map[string]map[string]int64),
 	}
 	for _, option := range options {
