@@ -12,7 +12,6 @@ import (
 
 // Standard labels.
 const (
-
 	//  RFC 5424 log levels.
 	Emergency = iota
 	Alert
@@ -27,7 +26,6 @@ const (
 )
 
 const (
-
 	// ANSI 8 colours.
 	foregroundBlack = iota + 30
 	foregroundRed
@@ -44,7 +42,6 @@ const (
 )
 
 var (
-
 	// Log labels.
 	labels = []string{"[EMERGENCY] ",
 		"[ALERT] ",

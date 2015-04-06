@@ -1,4 +1,5 @@
-// Package server implements a simple server to return concordance (word count + sentence location) for sample text.
+// Package server implements a simple server to return concordance (word count + sentence
+// location) for sample text.
 package server
 
 import (
@@ -87,7 +88,7 @@ func New(opts *Options, addedOptions ...func(*Server)) *Server {
 
 	s.handleSignals() // Evoke trap signals handler
 
-	// Additional hook for specialized custom options
+	// Additional hook for specialized custom options.
 	for _, option := range addedOptions {
 		option(s)
 	}
@@ -166,7 +167,7 @@ func (s *Server) Shutdown() bool {
 	s.listener = nil
 	s.mu.Unlock()
 
-	// Sleep a bit to allow all connections to be released
+	// Sleep a bit to allow all connections to be released.
 	var maxTimeout time.Duration
 	if TCPReadTimeout > TCPWriteTimeout {
 		maxTimeout = TCPReadTimeout
@@ -282,9 +283,11 @@ func (s *Server) initResponseHeader(w http.ResponseWriter) {
 	header.Add("X-Request-ID", createV4UUID())
 }
 
-// invalidHeader validates that the header information is acceptable for processing the request from the client.
+// invalidHeader validates that the header information is acceptable for processing the
+// request from the client.
 func (s *Server) invalidHeader(w http.ResponseWriter, r *http.Request) bool {
-	if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("Accept") != "application/json" {
+	if r.Header.Get("Content-Type") != "application/json" ||
+		r.Header.Get("Accept") != "application/json" {
 		http.Error(w, InvalidMediaType, http.StatusUnsupportedMediaType)
 		return true
 	}
