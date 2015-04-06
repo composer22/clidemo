@@ -1,19 +1,16 @@
 
 # OnDeck
-
-- [ ] Cleanup and refactoring
-- [ ] Complete unit tests
+- [ ] Docker support
 
 # Backlog
-
-- [ ] Docker support
 - [ ] Socket support
 - [ ] Database integration BOLT, mySQL + caching (for auth keys)
 - [ ] Alternate text parsing such as LuaJIT
 - [ ] Captn-Proto
 
 # Done
-
+- [x] Cleanup and refactoring
+- [x] Complete unit tests
 - [x] Bearer token authentication stub
 - [x] True connection throttling with custom listener
 - [x] Log all requests
