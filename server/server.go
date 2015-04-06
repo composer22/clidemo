@@ -149,19 +149,35 @@ func (s *Server) Shutdown() bool {
 		return true
 	}
 
-	s.log.Infof("Begin server service stop...")
+	s.log.Infof("BEGIN server service stop.")
+
 	s.mu.Lock()
-	s.log.Infof("Stopping listener and connections...")
+
+	s.log.Infof("\tStopping server listener...")
 	s.listener.Stop()
 	s.srvr.SetKeepAlivesEnabled(false)
-	s.log.Infof("Stopping all workers...")
+
+	s.log.Infof("\tStopping workers...")
 	close(s.jobq)
 	s.wg.Wait()
+
 	s.running = false
 	s.jobq = nil
 	s.listener = nil
 	s.mu.Unlock()
-	s.log.Infof("End server service stop.")
+
+	// Sleep a bit to allow all connections to be released
+	var maxTimeout time.Duration
+	if TCPReadTimeout > TCPWriteTimeout {
+		maxTimeout = TCPReadTimeout
+	} else {
+		maxTimeout = TCPWriteTimeout
+	}
+	maxTimeout = maxTimeout + (1 * time.Second)
+	s.log.Infof("\tAllowing all connections to close for %s...", maxTimeout.String())
+	time.Sleep(maxTimeout)
+
+	s.log.Infof("END server service stop.")
 	return true
 }
 

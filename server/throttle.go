@@ -28,26 +28,6 @@ func (c *ThrottledConn) Close() error {
 	return err
 }
 
-// CloseRead overloads the type function of the connection so that the listener throttle can be serviced.
-func (c *ThrottledConn) CloseRead() error {
-	var err error
-	c.closeOnce.Do(func() {
-		c.Done()
-		err = c.TCPConn.CloseRead()
-	})
-	return err
-}
-
-// CloseWrite overloads the type function of the connection so that the listener throttle can be serviced.
-func (c *ThrottledConn) CloseWrite() error {
-	var err error
-	c.closeOnce.Do(func() {
-		c.Done()
-		err = c.TCPConn.CloseWrite()
-	})
-	return err
-}
-
 // Done puts back a token so it can be serviced again by the throttle listener.
 func (c *ThrottledConn) Done() {
 	if c.acceptCh != nil {
