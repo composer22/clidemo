@@ -37,7 +37,7 @@ func TestServerStartup(t *testing.T) {
 	}
 
 	runtime.GOMAXPROCS(1)
-	testSrvr = New(opts)
+	testSrvr = New(opts, func(s *Server) {})
 	go func() { testSrvr.Start() }()
 }
 
