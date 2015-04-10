@@ -1,0 +1,10 @@
+FROM scratch
+
+MAINTAINER Bryan-Kirk Reinhardt <composer22@users.noreply.github.com>
+
+ADD clidemo /clidemo
+
+CMD []
+ENTRYPOINT ["/clidemo", "-N", "SanFrancisco", "-p", "8081", "-L", "6061", "-W", "5000"]
+
+EXPOSE 8081 6061
