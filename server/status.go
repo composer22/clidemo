@@ -22,35 +22,35 @@ func StatusNew(options ...func(*Status)) *Status {
 		ConnNumAvail: -1, // defaults to infinite.
 		RouteStats:   make(map[string]map[string]int64),
 	}
-	for _, option := range options {
-		option(st)
+	for _, f := range options {
+		f(st)
 	}
 	return st
 }
 
 // IncrRequestStats increments the stats totals for the server.
-func (s *Status) IncrRequestStats(reqBytes int64) {
+func (s *Status) IncrRequestStats(rb int64) {
 	s.RequestCount++
-	if reqBytes > 0 {
-		s.RequestBytes += reqBytes
+	if rb > 0 {
+		s.RequestBytes += rb
 	}
 }
 
 // IncrRouteStats increments the stats totals for the route.
-func (s *Status) IncrRouteStats(path string, reqBytes int64) {
+func (s *Status) IncrRouteStats(path string, rb int64) {
 	if _, ok := s.RouteStats[path]; !ok {
 		s.RouteStats[path] = make(map[string]int64)
 	}
 
 	s.RouteStats[path]["requestCount"]++
-	if reqBytes > 0 {
-		s.RouteStats[path]["requestBytes"] += reqBytes
+	if rb > 0 {
+		s.RouteStats[path]["requestBytes"] += rb
 	}
 }
 
 // String is an implentation of the Stringer interface so the structure is returned as a
 // string to fmt.Print() etc.
 func (s *Status) String() string {
-	result, _ := json.Marshal(s)
-	return string(result)
+	b, _ := json.Marshal(s)
+	return string(b)
 }

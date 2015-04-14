@@ -14,8 +14,8 @@ const (
 )
 
 func TestStatusNew(t *testing.T) {
-	stats := StatusNew()
-	tp := reflect.TypeOf(stats)
+	s := StatusNew()
+	tp := reflect.TypeOf(s)
 
 	if tp.Kind() != reflect.Ptr {
 		t.Fatalf("Status not created as a pointer.")
@@ -35,31 +35,31 @@ func TestStatusNew(t *testing.T) {
 
 func TestStatusIncrRequestStats(t *testing.T) {
 	t.Parallel()
-	stats := StatusNew()
-	stats.IncrRequestStats(-1)
-	if stats.RequestCount != 1 {
+	s := StatusNew()
+	s.IncrRequestStats(-1)
+	if s.RequestCount != 1 {
 		t.Errorf("Status RequestCount not incremented correctly.")
 	}
-	if stats.RequestBytes != 0 {
+	if s.RequestBytes != 0 {
 		t.Errorf("Status RequestBytes should not have been incremented or decremented.")
 	}
 
-	stats.IncrRequestStats(101)
-	stats.IncrRequestStats(99)
-	if stats.RequestCount != 3 {
+	s.IncrRequestStats(101)
+	s.IncrRequestStats(99)
+	if s.RequestCount != 3 {
 		t.Errorf("Status RequestCount not incremented correctly.")
 	}
-	if stats.RequestBytes != 200 {
+	if s.RequestBytes != 200 {
 		t.Errorf("Status RequestBytes should have been incremented.")
 	}
 }
 
 func TestStatusIncrRouteStats(t *testing.T) {
 	t.Parallel()
-	stats := StatusNew()
-	stats.IncrRouteStats("Route1", -1)
+	s := StatusNew()
+	s.IncrRouteStats("Route1", -1)
 
-	rs, ok := stats.RouteStats["Route1"]
+	rs, ok := s.RouteStats["Route1"]
 	if !ok {
 		t.Errorf(`Status RouteStats["Route1"] entry not created correctly.`)
 	}
@@ -80,18 +80,18 @@ func TestStatusIncrRouteStats(t *testing.T) {
 		t.Errorf(`Status RouteStats["Route1"]["requestBytes"] entry should not have been created.`)
 	}
 
-	stats = StatusNew()
-	stats.IncrRouteStats("Route2", -1)
-	stats.IncrRouteStats("Route2", 201)
-	stats.IncrRouteStats("Route2", 98)
-	if stats.RouteStats["Route2"]["requestCount"] != 3 {
+	s = StatusNew()
+	s.IncrRouteStats("Route2", -1)
+	s.IncrRouteStats("Route2", 201)
+	s.IncrRouteStats("Route2", 98)
+	if s.RouteStats["Route2"]["requestCount"] != 3 {
 		t.Errorf(`Status["Route2"]["requestCount"] not incremented correctly.`)
 	}
-	_, ok = stats.RouteStats["Route2"]["requestBytes"]
+	_, ok = s.RouteStats["Route2"]["requestBytes"]
 	if !ok {
 		t.Errorf(`Status RouteStats["Route1"]["requestBytes"] entry should have been created.`)
 	}
-	if stats.RouteStats["Route2"]["requestBytes"] != 299 {
+	if s.RouteStats["Route2"]["requestBytes"] != 299 {
 		t.Errorf(`Status["Route2"]["requestBytes"] not incremented correctly.`)
 	}
 }
@@ -99,7 +99,7 @@ func TestStatusIncrRouteStats(t *testing.T) {
 func TestStatusString(t *testing.T) {
 	t.Parallel()
 	mockTime, _ := time.Parse(time.RFC1123Z, "Mon, 02 Jan 2006 13:24:56 -0000")
-	stats := StatusNew(func(sts *Status) {
+	s := StatusNew(func(sts *Status) {
 		sts.Start = mockTime
 		sts.ConnNumAvail = 1234
 		sts.RouteStats = map[string]map[string]int64{
@@ -107,7 +107,9 @@ func TestStatusString(t *testing.T) {
 			"route2": map[string]int64{"requestCounts": 103, "requesBytes": 204},
 		}
 	})
-	if fmt.Sprint(stats) != expectedStatsJSONResult {
-		t.Errorf("Status not converted to json string.")
+	actual := fmt.Sprint(s)
+	if actual != expectedStatsJSONResult {
+		t.Errorf("Status not converted to json string.\n\nExpected: %s\n\nActual: %s\n",
+			expectedStatsJSONResult, actual)
 	}
 }

@@ -40,7 +40,6 @@ func TestInfoNew(t *testing.T) {
 	if !(tp.NumField() > 0) {
 		t.Fatalf("Info struct is empty.")
 	}
-
 }
 
 func TestInfoString(t *testing.T) {
@@ -56,7 +55,9 @@ func TestInfoString(t *testing.T) {
 		i.MaxWorkers = 888
 		i.Debug = true
 	})
-	if fmt.Sprint(info) != expectedInfoJSONResult {
-		t.Errorf("Info not converted to json string.")
+	actual := fmt.Sprint(info)
+	if actual != expectedInfoJSONResult {
+		t.Errorf("Info not converted to json string.\n\nExpected: %s\n\nActual: %s\n",
+			expectedInfoJSONResult, actual)
 	}
 }

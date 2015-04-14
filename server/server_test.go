@@ -36,7 +36,6 @@ func TestServerStartup(t *testing.T) {
 		MaxProcs:   1,
 		Debug:      true,
 	}
-
 	runtime.GOMAXPROCS(1)
 	testSrvr = New(opts, func(s *Server) {})
 	go func() { testSrvr.Start() }()
@@ -44,7 +43,6 @@ func TestServerStartup(t *testing.T) {
 
 func TestValidHeaders(t *testing.T) {
 	client := &http.Client{}
-
 	req, _ := http.NewRequest("GET", "http://localhost:8080/v1.0/alive", nil)
 	req.Header.Add("Accept-Encoding", "gzip, deflate")
 	req.Header.Add("Content-Type", "application/json")
@@ -126,7 +124,6 @@ func TestValidHeaders(t *testing.T) {
 
 func TestMethods(t *testing.T) {
 	client := &http.Client{}
-
 	req, _ := http.NewRequest("POST", "http://localhost:8080/v1.0/status", nil)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Accept-Encoding", "gzip, deflate")
@@ -179,7 +176,6 @@ func TestMethods(t *testing.T) {
 
 func TestRoutes(t *testing.T) {
 	client := &http.Client{}
-
 	req, _ := http.NewRequest("GET", "http://localhost:8080/v1.0/status", nil)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Accept-Encoding", "gzip, deflate")
@@ -235,7 +231,6 @@ func TestRoutes(t *testing.T) {
 
 func TestParseHandler(t *testing.T) {
 	client := &http.Client{}
-
 	req, _ := http.NewRequest("POST", "http://localhost:8080/v1.0/parse",
 		strings.NewReader(fmt.Sprintf(`"text":"%s"`, testParserText)))
 	req.Header.Add("Accept", "application/json")
@@ -277,7 +272,6 @@ func TestServerPrintVersion(t *testing.T) {
 }
 
 func TestServerTakeDown(t *testing.T) {
-
 	time.Sleep(2 * time.Second) // Coverage of timeout in Throttle.
 	testSrvr.Shutdown()
 	testSrvr.Shutdown() // Coverage of isRunning test in Shutdown().

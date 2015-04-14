@@ -23,6 +23,7 @@ import (
 	"github.com/composer22/clidemo/logger"
 )
 
+// requestLogEntry is a datastructure of a log entry for recording server access requests.
 type requestLogEntry struct {
 	Method        string      `json:"method"`
 	URL           *url.URL    `json:"url"`
@@ -89,8 +90,8 @@ func New(opts *Options, addedOptions ...func(*Server)) *Server {
 	s.handleSignals() // Evoke trap signals handler
 
 	// Additional hook for specialized custom options.
-	for _, option := range addedOptions {
-		option(s)
+	for _, f := range addedOptions {
+		f(s)
 	}
 	return s
 }
@@ -274,13 +275,13 @@ func (s *Server) incrementStats(r *http.Request) {
 
 // initResponseHeader sets up the common http response headers for the return of all json calls.
 func (s *Server) initResponseHeader(w http.ResponseWriter) {
-	header := w.Header()
-	header.Add("Content-Type", "application/json;charset=utf-8")
-	header.Add("Date", time.Now().UTC().Format(time.RFC1123Z))
+	h := w.Header()
+	h.Add("Content-Type", "application/json;charset=utf-8")
+	h.Add("Date", time.Now().UTC().Format(time.RFC1123Z))
 	if s.info.Name != "" {
-		header.Add("Server", s.info.Name)
+		h.Add("Server", s.info.Name)
 	}
-	header.Add("X-Request-ID", createV4UUID())
+	h.Add("X-Request-ID", createV4UUID())
 }
 
 // invalidHeader validates that the header information is acceptable for processing the
@@ -319,18 +320,18 @@ func (s *Server) LogRequest(r *http.Request) {
 		cl = r.ContentLength
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	bd, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		body = []byte("Could not parse body")
+		bd = []byte("Could not parse body")
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body)) // We need to set the body back after we read it.
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bd)) // We need to set the body back after we read it.
 
 	b, _ := json.Marshal(&requestLogEntry{
 		Method:        r.Method,
 		URL:           r.URL,
 		Proto:         r.Proto,
 		Header:        r.Header,
-		Body:          string(body),
+		Body:          string(bd),
 		ContentLength: cl,
 		Host:          r.Host,
 		RemoteAddr:    r.RemoteAddr,

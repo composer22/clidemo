@@ -16,7 +16,7 @@ func TestSetAndGetLogLevel(t *testing.T) {
 	}
 	err := l.SetLogLevel(Info)
 	if err != nil {
-		t.Errorf("Set log level func should have been called correctly for value.")
+		t.Errorf("Set log level func should have been called correctly for value Info.")
 	}
 	if l.level != Info {
 		t.Errorf("Set log level func should have set new value correctly.")
@@ -24,7 +24,7 @@ func TestSetAndGetLogLevel(t *testing.T) {
 
 	err = l.SetLogLevel(UseDefault)
 	if err != nil {
-		t.Errorf("Set log level func should have been called correctly for value.")
+		t.Errorf("Set log level func should have been called correctly for value UseDefault.")
 	}
 
 	if l.level != Info {
@@ -62,20 +62,20 @@ func TestSetErrorFunc(t *testing.T) {
 func TestSetColourLabels(t *testing.T) {
 	l := New(UseDefault, true)
 	for i, actual := range l.labels {
-		var colour int
+		var clr int
 		switch i {
 		case Emergency, Alert, Critical, Error:
-			colour = foregroundRed
+			clr = foregroundRed
 		case Warning:
-			colour = foregroundYellow
+			clr = foregroundYellow
 		case Notice:
-			colour = foregroundGreen
+			clr = foregroundGreen
 		case Debug:
-			colour = foregroundBlue
+			clr = foregroundBlue
 		default:
-			colour = foregroundDefault
+			clr = foregroundDefault
 		}
-		expected := fmt.Sprintf(colourFormat, colour, labels[i])
+		expected := fmt.Sprintf(colourFormat, clr, labels[i])
 		if expected != actual {
 			t.Errorf("Invalid colour label\nExpected:%s\nActual:%s", expected, actual)
 		}
@@ -84,85 +84,85 @@ func TestSetColourLabels(t *testing.T) {
 
 func TestEmergencyf(t *testing.T) {
 	t.Parallel()
-	test_message := "Emergencyf"
+	testMsg := "Emergencyf"
 	expectOutput(t, func() {
 		l := New(Debug, false) // Mock the exit so coverage can complete.
 		l.exit = func(code int) {}
-		l.Emergencyf(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Emergency], test_message))
+		l.Emergencyf(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Emergency], testMsg))
 }
 
 func TestAlertf(t *testing.T) {
 	t.Parallel()
-	test_message := "Alertf"
+	testMsg := "Alertf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Alertf(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Alert], test_message))
+		l.Alertf(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Alert], testMsg))
 }
 
 func TestCriticalf(t *testing.T) {
 	t.Parallel()
-	test_message := "Criticalf"
+	testMsg := "Criticalf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Criticalf(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Critical], test_message))
+		l.Criticalf(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Critical], testMsg))
 }
 
 func TestErrorf(t *testing.T) {
 	t.Parallel()
-	test_message := "Errorf"
+	testMsg := "Errorf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Errorf(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Error], test_message))
+		l.Errorf(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Error], testMsg))
 }
 
 func TestWarningf(t *testing.T) {
 	t.Parallel()
-	test_message := "Warningf"
+	testMsg := "Warningf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Warningf(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Warning], test_message))
+		l.Warningf(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Warning], testMsg))
 }
 
 func TestNoticef(t *testing.T) {
 	t.Parallel()
-	test_message := "Noticef"
+	testMsg := "Noticef"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Noticef(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Notice], test_message))
+		l.Noticef(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Notice], testMsg))
 }
 
 func TestInfof(t *testing.T) {
 	t.Parallel()
-	test_message := "Infof"
+	testMsg := "Infof"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Infof(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Info], test_message))
+		l.Infof(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Info], testMsg))
 }
 
 func TestDebugf(t *testing.T) {
 	t.Parallel()
-	test_message := "Debugf"
+	testMsg := "Debugf"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Debugf(test_message)
-	}, fmt.Sprintf("%s%s\n", labels[Debug], test_message))
+		l.Debugf(testMsg)
+	}, fmt.Sprintf("%s%s\n", labels[Debug], testMsg))
 }
 
 func TestOutputf(t *testing.T) {
 	t.Parallel()
-	test_label := "[OUTPUT] "
-	test_message := "Output"
+	testLbl := "[OUTPUT] "
+	testMsg := "Output"
 	expectOutput(t, func() {
 		l := New(Debug, false)
-		l.Output(-1, test_label, test_message)
-	}, fmt.Sprintf("%s%s\n", test_label, test_message))
+		l.Output(-1, testLbl, testMsg)
+	}, fmt.Sprintf("%s%s\n", testLbl, testMsg))
 }
 
 // expectOutput is a helper function that repipes or mocks out stdout and allows error messages to be tested

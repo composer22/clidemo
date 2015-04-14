@@ -29,14 +29,14 @@ For TODOs, please see TODO.md
 ## Usage
 
 ```
-Description: Parse text counting words and sentence locations, this command can be
+Description: Parse text counting words and sentence locations, This command can be
 evoked as either a command line utility or as a stand alone server process.
 
 Usage: clidemo [options...] [input_filename]
 
 Server options:
     -N, --name NAME                  NAME of the server (default: empty field).
-    -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
+    -H, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
     -p, --port PORT                  PORT to listen on (default: 49152).
 	-L, --profiler_port PORT         *PORT the profiler is listening on (default: off).
     -n, --connections MAX            *MAX server connections allowed (default: unlimited).
@@ -80,11 +80,10 @@ command line flags only
 
 ## Building
 
-This code currently requires version 1.42 or higher of Go, but we encourage the use of the latest stable release.
+This code currently requires version 1.42 or higher of Go,
 
 Information on Golang installation, including pre-built binaries, is available at
-<http://golang.org/doc/install>.  Stable branches of operating system packagers provided by
-your OS vendor may not be sufficient.
+<http://golang.org/doc/install>.
 
 Run `go version` to see the version of Go which you have installed.
 
@@ -93,7 +92,7 @@ Run `go build` inside the directory to build.
 Run `go test ./...` to run the unit regression tests.
 
 A successful build run produces no messages and creates an executable called `clidemo` in this
-directory.  You can invoke that binary, with no options to start a server with acceptable standalone defaults.
+directory.
 
 Run `go help` for more guidance, and visit <http://golang.org/> for tutorials, presentations, references and more.
 

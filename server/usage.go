@@ -14,7 +14,7 @@ Usage: clidemo [options...] [input_filename]
 
 Server options:
     -N, --name NAME                  NAME of the server (default: empty field).
-    -h, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
+    -H, --hostname HOSTNAME          HOSTNAME of the server (default: localhost).
     -p, --port PORT                  PORT to listen on (default: 49152).
 	-L, --profiler_port PORT         *PORT the profiler is listening on (default: off).
     -n, --connections MAX            *MAX server connections allowed (default: unlimited).
