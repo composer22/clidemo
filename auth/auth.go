@@ -23,9 +23,9 @@ func New() *Auth {
 	return &Auth{Tokens: tokens}
 }
 
-// Validate returns true if the token was found and is valid.
-func (t *Auth) Valid(token string) bool {
-	a, ok := t.Tokens[token]
+// Valid returns true if the token was found and is valid.
+func (t *Auth) Valid(tk string) bool {
+	a, ok := t.Tokens[tk]
 	if !ok {
 		return false
 	}

@@ -31,6 +31,6 @@ func InfoNew(options ...func(*Info)) *Info {
 // String is an implentation of the Stringer interface so the structure is returned as a
 // string to fmt.Print() etc.
 func (i *Info) String() string {
-	result, _ := json.Marshal(i)
-	return string(result)
+	b, _ := json.Marshal(i)
+	return string(b)
 }

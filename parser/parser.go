@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	punctuationMarks = ";:,!?.\\/[](){}-\"'`"
+	punctMarks = ";:,!?.\\/[](){}-\"'`"
 )
 
 // Parser represents text source plus a mapping of unique words found in the text with an arrray of sentence ids where the
@@ -33,16 +33,16 @@ func New() *Parser {
 
 // Execute begins the parsing process. The source text is read, words are counted,
 // and unique sentence ids are recorded.
-func (p *Parser) Execute(source io.Reader) {
-	scanner := bufio.NewScanner(source)
-	scanner.Split(bufio.ScanWords)
+func (p *Parser) Execute(s io.Reader) {
+	scnr := bufio.NewScanner(s)
+	scnr.Split(bufio.ScanWords)
 
 	eos := false
-	sentPointer := 0
+	sentPtr := 0
 
 	// Loop on the text and analyze word usage.
-	for scanner.Scan() {
-		word := scanner.Text()
+	for scnr.Scan() {
+		word := scnr.Text()
 
 		// Check for period in word and mark EOS was found.
 		if strings.HasSuffix(word, ".") {
@@ -50,7 +50,7 @@ func (p *Parser) Execute(source io.Reader) {
 		}
 
 		// Remove beginning and trailing punctuation.
-		word = strings.Trim(word, punctuationMarks)
+		word = strings.Trim(word, punctMarks)
 
 		// Store it as a result.
 		if len(word) > 0 {
@@ -64,12 +64,12 @@ func (p *Parser) Execute(source io.Reader) {
 				w = p.Words[key]
 			}
 			w.Counter++
-			w.SentenceUse = append(w.SentenceUse, sentPointer)
+			w.SentenceUse = append(w.SentenceUse, sentPtr)
 		}
 
 		// If a period was found in the word advance the pointer.
 		if eos {
-			sentPointer++
+			sentPtr++
 			eos = false
 		}
 	}
@@ -82,6 +82,6 @@ func (p *Parser) Reset() {
 
 // String is an implentation of the Stringer interface so the structure is returned as a string to fmt.Print() etc.
 func (p *Parser) String() string {
-	result, _ := json.Marshal(p)
-	return string(result)
+	b, _ := json.Marshal(p)
+	return string(b)
 }

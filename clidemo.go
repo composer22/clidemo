@@ -39,7 +39,7 @@ func main() {
 
 	flag.StringVar(&opts.Name, "N", "", "Name of the server (optional)")
 	flag.StringVar(&opts.Name, "--name", "", "Name of the server (optional)")
-	flag.StringVar(&opts.Hostname, "h", server.DefaultHostname, "Hostname of the server")
+	flag.StringVar(&opts.Hostname, "H", server.DefaultHostname, "Hostname of the server")
 	flag.StringVar(&opts.Hostname, "--hostname", server.DefaultHostname, "Name of the server")
 	flag.IntVar(&opts.Port, "p", server.DefaultPort, "Port to listen on (default: 49152)")
 	flag.IntVar(&opts.Port, "--port", server.DefaultPort, "Port to listen on (default: 49152)")

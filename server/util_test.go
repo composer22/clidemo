@@ -12,7 +12,6 @@ const (
 func TestUtilsCreateV4UUID(t *testing.T) {
 	t.Parallel()
 	r, _ := regexp.Compile(v4UUIDRegExpFmt)
-
 	for i := 0; i < 10; i++ {
 		uuid := createV4UUID()
 		if !r.MatchString(uuid) {
@@ -25,5 +24,4 @@ func TestUtilsCreateV4UUID(t *testing.T) {
 	if uuid1 == uuid2 {
 		t.Errorf("UUID not being created uniquely.")
 	}
-
 }

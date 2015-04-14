@@ -18,6 +18,6 @@ type Options struct {
 // String is an implentation of the Stringer interface so the structure is returned as a string
 // to fmt.Print() etc.
 func (o *Options) String() string {
-	result, _ := json.Marshal(o)
-	return string(result)
+	b, _ := json.Marshal(o)
+	return string(b)
 }

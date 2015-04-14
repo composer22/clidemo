@@ -13,7 +13,7 @@ const (
 
 func TestOptionsString(t *testing.T) {
 	t.Parallel()
-	options := &Options{
+	opts := &Options{
 		Name:       "Test Options",
 		Hostname:   "localhost",
 		Port:       8080,
@@ -23,7 +23,9 @@ func TestOptionsString(t *testing.T) {
 		MaxProcs:   888,
 		Debug:      true,
 	}
-	if fmt.Sprint(options) != expectedOptionsJSONResult {
-		t.Errorf("Options not converted to json string.")
+	actual := fmt.Sprint(opts)
+	if actual != expectedOptionsJSONResult {
+		t.Errorf("Options not converted to json string.\n\nExpected: %s\n\nActual: %s\n",
+			expectedOptionsJSONResult, actual)
 	}
 }

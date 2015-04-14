@@ -66,20 +66,20 @@ type Logger struct {
 }
 
 // New is a factory method to return a new logger instance.
-func New(level int, colours bool) *Logger {
+func New(lvl int, clrs bool) *Logger {
 	flags := log.Lshortfile | log.Ldate | log.Lmicroseconds
 	pre := fmt.Sprintf("[%d] ", os.Getpid())
-	if level == UseDefault {
-		level = Info
+	if lvl == UseDefault {
+		lvl = Info
 	}
 
 	l := &Logger{
 		logger: log.New(os.Stdout, pre, flags),
-		level:  level,
+		level:  lvl,
 		exit:   func(code int) { os.Exit(code) },
 	}
 
-	if colours {
+	if clrs {
 		l.SetColouredLabels()
 	} else {
 		l.SetPlainLabels()
@@ -88,24 +88,24 @@ func New(level int, colours bool) *Logger {
 }
 
 // SetLogLevel allows a user to set the log level of the logger.
-func (l *Logger) SetLogLevel(logLevel int) error {
-	if logLevel < UseDefault || logLevel > Debug {
-		return errors.New(fmt.Sprintf("%d log level arg is not in valid range.", logLevel))
+func (l *Logger) SetLogLevel(lvl int) error {
+	if lvl < UseDefault || lvl > Debug {
+		return errors.New(fmt.Sprintf("%d log level arg is not in valid range.", lvl))
 	}
 
-	if logLevel == UseDefault {
-		logLevel = Info
+	if lvl == UseDefault {
+		lvl = Info
 	}
-	l.level = logLevel
+	l.level = lvl
 	return nil
 }
 
 // SetExitFunc allows a user to set the exit function of the logger.
-func (l *Logger) SetExitFunc(exitF exiter) error {
-	if exitF == nil {
+func (l *Logger) SetExitFunc(e exiter) error {
+	if e == nil {
 		return errors.New("Exit function is manadatory.")
 	}
-	l.exit = exitF
+	l.exit = e
 	return nil
 }
 
@@ -123,20 +123,20 @@ func (l *Logger) SetPlainLabels() {
 func (l *Logger) SetColouredLabels() {
 	l.labels = make([]string, 0)
 	for i, lbl := range labels {
-		var colour int
+		var clr int
 		switch i {
 		case Emergency, Alert, Critical, Error:
-			colour = foregroundRed
+			clr = foregroundRed
 		case Warning:
-			colour = foregroundYellow
+			clr = foregroundYellow
 		case Notice:
-			colour = foregroundGreen
+			clr = foregroundGreen
 		case Debug:
-			colour = foregroundBlue
+			clr = foregroundBlue
 		default:
-			colour = foregroundDefault
+			clr = foregroundDefault
 		}
-		l.labels = append(l.labels, fmt.Sprintf(colourFormat, colour, lbl))
+		l.labels = append(l.labels, fmt.Sprintf(colourFormat, clr, lbl))
 	}
 }
 
@@ -198,17 +198,17 @@ func (l *Logger) Debugf(format string, v ...interface{}) {
 	}
 }
 
-// output prints a message directly into the system log. Normally, you should use level message functions.
+// Output prints a message directly into the system log. Normally, you should use level message functions.
 // so that level can trap the write.
-func (l *Logger) Output(calldepth int, label string, format string, v ...interface{}) error {
+func (l *Logger) Output(cd int, lbl string, format string, v ...interface{}) error {
 	var d int = 2
-	if calldepth > 0 {
-		d = calldepth
+	if cd > 0 {
+		d = cd
 	}
-	return l.logger.Output(d, fmt.Sprintf(label+format, v...))
+	return l.logger.Output(d, fmt.Sprintf(lbl+format, v...))
 }
 
 // performExit wraps the application exit point wih a custom closure/anonymous function.
-func (l *Logger) performExit(exit exiter) {
-	exit(1) // call the exiter function
+func (l *Logger) performExit(xit exiter) {
+	xit(1) // call the exiter function
 }

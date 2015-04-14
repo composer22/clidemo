@@ -45,7 +45,7 @@ type ThrottledListener struct {
 }
 
 // ThrottledListenerNew is a factory function that returns an instatiated ThrottledListener.
-func ThrottledListenerNew(addr string, maxConnAllowed int) (*ThrottledListener, error) {
+func ThrottledListenerNew(addr string, mxConn int) (*ThrottledListener, error) {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
@@ -53,9 +53,9 @@ func ThrottledListenerNew(addr string, maxConnAllowed int) (*ThrottledListener, 
 
 	// Initialize accept tokens.
 	var acceptCh chan bool
-	if maxConnAllowed > 0 {
-		acceptCh = make(chan bool, maxConnAllowed)
-		for i := 0; i < maxConnAllowed; i++ {
+	if mxConn > 0 {
+		acceptCh = make(chan bool, mxConn)
+		for i := 0; i < mxConn; i++ {
 			acceptCh <- true
 		}
 	}
@@ -63,7 +63,7 @@ func ThrottledListenerNew(addr string, maxConnAllowed int) (*ThrottledListener, 
 		TCPListener: ln.(*net.TCPListener),
 		acceptCh:    acceptCh,
 		stopCh:      make(chan bool),
-		maxConns:    maxConnAllowed,
+		maxConns:    mxConn,
 	}, nil
 }
 
