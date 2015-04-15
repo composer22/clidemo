@@ -1,4 +1,4 @@
-FROM google/golang:1.4.2
+FROM google/golang:1.4
 
 MAINTAINER Bryan-Kirk Reinhardt <composer22@users.noreply.github.com>
 
