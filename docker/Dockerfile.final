@@ -1,3 +1,4 @@
+# For additional unix tools in a small image use FROM busybox below.
 FROM scratch
 MAINTAINER Bryan-Kirk Reinhardt <composer22@users.noreply.github.com>
 
@@ -5,7 +6,10 @@ MAINTAINER Bryan-Kirk Reinhardt <composer22@users.noreply.github.com>
 ADD clidemo /clidemo
 
 CMD []
-# It is important to set this -H flag with 0.0.0.0 instead of localhost to expose the server.
+
+# Entrypoint notes:
+# It was important to set this -H flag with 0.0.0.0 instead of localhost to expose the server.
+# See README.md for additional information if you are running this under boot2docker.
 ENTRYPOINT ["/clidemo", "-N", "NoName", "-H", "0.0.0.0", "-p", "8080", "-L", "6060", "-W", "100"]
 
 EXPOSE 8080 6060
