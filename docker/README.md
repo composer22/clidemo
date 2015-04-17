@@ -3,10 +3,6 @@
 
 A docker image for clidemo. This is created as a single "static" executable using a lightweight image.
 
-First, docker creates a container and new image to compile a static executable using the google/golang:1.4 image.
-Second, docker is used to create a smaller container (using the scratch image) with only this executable.
-Finally, the working space builder container and image is deleted.
-
 To make:
 
 cd docker

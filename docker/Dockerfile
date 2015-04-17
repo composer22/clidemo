@@ -1,6 +1,6 @@
 FROM google/golang:1.4
 
-MAINTAINER Bryan-Kirk Reinhardt <composer22@users.noreply.github.com>
+MAINTAINER Bryan-Kirk Reinhardt
 
 RUN CGO_ENABLED=0 go get -a --installsuffix cgo -ldflags '-s' github.com/composer22/clidemo
 COPY Dockerfile.final /gopath/bin/Dockerfile

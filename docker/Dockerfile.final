@@ -1,8 +1,7 @@
 # For additional unix tools in a small image use FROM busybox below.
 FROM scratch
-MAINTAINER Bryan-Kirk Reinhardt <composer22@users.noreply.github.com>
+MAINTAINER Bryan-Kirk Reinhardt
 
-# Copy the compiled module from the builder to this container
 ADD clidemo /clidemo
 
 CMD []
