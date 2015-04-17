@@ -3,7 +3,7 @@ package server
 import "time"
 
 const (
-	version               = "0.1.1"     // Application and server version.
+	version               = "0.1.2"     // Application and server version.
 	DefaultHostname       = "localhost" // The hostname of the server.
 	DefaultPort           = 49152       // Port to receive requests: see IANA Port Numbers.
 	DefaultProfPort       = 0           // Profiler port to receive requests.*
