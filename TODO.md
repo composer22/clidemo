@@ -1,6 +1,4 @@
-
 # OnDeck
-- [ ] Docker support
 
 # Backlog
 - [ ] Socket support
@@ -9,6 +7,7 @@
 - [ ] Captn-Proto
 
 # Done
+- [x] Docker support
 - [x] Cleanup and refactoring
 - [x] Complete unit tests
 - [x] Bearer token authentication stub

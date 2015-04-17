@@ -1,7 +1,7 @@
 # clidemo
 [![License MIT](https://img.shields.io/npm/l/express.svg)](http://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/composer22/clidemo.svg?branch=master)](http://travis-ci.org/composer22/clidemo)
-[![Current Release](https://img.shields.io/badge/release-v0.1.0-brightgreen.svg)](https://github.com/composer22/clidemo/releases/tag/v0.1.0)
+[![Current Release](https://img.shields.io/badge/release-v0.1.1-brightgreen.svg)](https://github.com/composer22/clidemo/releases/tag/v0.1.1)
 [![Coverage Status](https://coveralls.io/repos/composer22/clidemo/badge.svg?branch=master)](https://coveralls.io/r/composer22/clidemo?branch=master)
 
 A text parser for counting words and sentence locations written in [Go.](http://golang.org)
@@ -95,6 +95,16 @@ A successful build run produces no messages and creates an executable called `cl
 directory.
 
 Run `go help` for more guidance, and visit <http://golang.org/> for tutorials, presentations, references and more.
+
+## Docker Images
+
+A prebuilt docker image is available at (http://www.docker.com) [clidemo](https://registry.hub.docker.com/u/composer22/clidemo/)
+
+If you have docker installed, run:
+```
+docker pull composer22/clidemo:latest
+```
+See /docker directory README for more information on how to run it.
 
 ## API calls
 
